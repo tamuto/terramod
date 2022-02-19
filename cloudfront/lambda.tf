@@ -2,7 +2,7 @@
 data "archive_file" "src_indexdir" {
     type = "zip"
     source_file = "${path.module}/js/indexdir.js"
-    output_path = "${path.module}/dist/indexdir.zip"
+    output_path = "./dist/indexdir.zip"
 }
 
 resource "aws_lambda_function" "indexdir" {

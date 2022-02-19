@@ -1,21 +1,21 @@
 # User Pool
 resource "aws_cognito_user_pool" "user_pool" {
   name = "${var.prefix}-${var.name}-user"
-
+/*
   schema {
     attribute_data_type = "String"
     name                = "email"
-    required            = true
+    required            = false
   }
-
+*/
   username_configuration {
     case_sensitive = false
   }
-
+/*
   auto_verified_attributes = [
     "email"
   ]
-
+*/
   password_policy {
 
     minimum_length    = 8

@@ -1,5 +1,5 @@
 resource "aws_apigatewayv2_domain_name" "authapi" {
-    domain_name = "auth.${var.domain}"
+    domain_name = "api.${var.domain}"
 
     domain_name_configuration {
         certificate_arn = data.aws_acm_certificate.cert.arn

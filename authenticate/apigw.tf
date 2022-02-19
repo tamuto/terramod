@@ -11,6 +11,13 @@ resource "aws_apigatewayv2_integration" "authapi" {
     payload_format_version = "2.0"
 }
 
+resource "aws_apigatewayv2_integration" "cors" {
+    api_id = aws_apigatewayv2_api.authapi.id
+    integration_type = "AWS_PROXY"
+    integration_uri = aws_lambda_function.cors.arn
+    payload_format_version = "2.0"
+}
+
 resource "aws_apigatewayv2_authorizer" "authapi" {
     api_id = aws_apigatewayv2_api.authapi.id
     authorizer_type = "JWT"
@@ -24,10 +31,16 @@ resource "aws_apigatewayv2_authorizer" "authapi" {
 
 resource "aws_apigatewayv2_route" "authapi" {
     api_id = aws_apigatewayv2_api.authapi.id
-    route_key = "GET /auth"
+    route_key = "GET /"
     target = "integrations/${aws_apigatewayv2_integration.authapi.id}"
     authorization_type = "JWT"
     authorizer_id = aws_apigatewayv2_authorizer.authapi.id
+}
+
+resource "aws_apigatewayv2_route" "cors" {
+    api_id = aws_apigatewayv2_api.authapi.id
+    route_key = "OPTIONS /"
+    target = "integrations/${aws_apigatewayv2_integration.cors.id}"
 }
 
 resource "aws_apigatewayv2_stage" "default" {
@@ -48,8 +61,17 @@ resource "aws_lambda_permission" "authapi" {
     source_arn = "${aws_apigatewayv2_api.authapi.execution_arn}/*/*"
 }
 
+resource "aws_lambda_permission" "cors" {
+    function_name = aws_lambda_function.cors.arn
+    principal = "apigateway.amazonaws.com"
+    action = "lambda:InvokeFunction"
+
+    source_arn = "${aws_apigatewayv2_api.authapi.execution_arn}/*/*"
+}
+
 resource "aws_apigatewayv2_api_mapping" "authapi" {
     api_id = aws_apigatewayv2_api.authapi.id
     domain_name = aws_apigatewayv2_domain_name.authapi.id
-    stage = "$default"
+    stage = aws_apigatewayv2_stage.default.id
+    api_mapping_key = "auth"
 }
