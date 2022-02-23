@@ -13,7 +13,7 @@ resource "aws_cloudfront_distribution" "static_web" {
 
     default_root_object = "index.html"
 
-    aliases = ["${var.prefix}.${var.domain}"]
+    aliases = ["${var.domain}"]
 
     viewer_certificate {
         acm_certificate_arn = var.acm_arn
