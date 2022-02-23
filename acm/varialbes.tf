@@ -1,1 +1,1 @@
-varialbe "domain" {}
+variable "domain" {}
