@@ -1,4 +1,4 @@
-output "acm_id" {
+output "id" {
     value = aws_acm_certificate.cert.id
 }
 
