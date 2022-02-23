@@ -11,13 +11,13 @@ data "aws_iam_policy_document" "cf_web" {
             "s3:GetObject"
         ]
         resources = [
-            "arn:aws:s3:::${var.prefix}-web/*"
+            "arn:aws:s3:::${var.s3prefix}-web/*"
         ]
     }
 }
 
 resource "aws_s3_bucket" "cf_web" {
-    bucket = "${var.prefix}-web"
+    bucket = "${var.s3prefix}-web"
 }
 
 resource "aws_s3_bucket_policy" "cf_web" {

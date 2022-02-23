@@ -11,13 +11,13 @@ data "aws_iam_policy_document" "cf_logging" {
             "s3:PutObject"
         ]
         resources = [
-            "arn:aws:s3:::${var.prefix}-cf-logging/*"
+            "arn:aws:s3:::${var.s3prefix}-cf-logging/*"
         ]
     }
 }
 
 resource "aws_s3_bucket" "cf_logging" {
-    bucket = "${var.prefix}-cf-logging"
+    bucket = "${var.s3prefix}-cf-logging"
 }
 
 resource "aws_s3_bucket_policy" "cf_logging" {
