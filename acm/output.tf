@@ -1,3 +1,3 @@
 output "acm_id" {
-    value = acm.cert.id
+    value = aws_acm_certificate.cert.id
 }
