@@ -18,6 +18,10 @@ data "aws_iam_policy_document" "cf_web" {
 
 resource "aws_s3_bucket" "cf_web" {
     bucket = "${var.prefix}-web"
+}
+
+resource "aws_s3_bucket_policy" "cf_web" {
+    bucket = aws_s3_bucket.cf_web.id
     policy = data.aws_iam_policy_document.cf_web.json
 }
 
