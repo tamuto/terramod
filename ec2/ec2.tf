@@ -22,4 +22,8 @@ resource "aws_instance" "ec2" {
     }
 
     iam_instance_profile = var.ec2_role
+
+    tags = {
+        Name = "${var.name}"
+    }
 }
