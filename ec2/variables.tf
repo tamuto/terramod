@@ -6,6 +6,9 @@ variable ami {
 variable instance_type {}
 variable vpc_name {}
 variable subnet_name {}
+variable secgroup_name {
+    default = "default"
+}
 variable volume_size {
     default = 20
 }
@@ -27,6 +30,6 @@ data "aws_vpc" "vpc" {
 }
 
 data "aws_security_group" "default" {
-    name = "default"
+    name = var.secgroup_name
     vpc_id = data.aws_vpc.vpc.id
 }
