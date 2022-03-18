@@ -1,6 +1,9 @@
 variable ssm_role {}
 variable vpc_name {}
 variable subnet_name {}
+variable secgroup_name {
+    default = "default"
+}
 variable region {
     default = "ap-northeast-1"
 }
@@ -20,5 +23,6 @@ data "aws_subnet" "subnet" {
 }
 
 data "aws_security_group" "default" {
-    name = "default"
+    name = var.secgroup_name
+    vpc_id = data.aws_vpc.vpc.id
 }
