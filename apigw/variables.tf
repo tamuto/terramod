@@ -11,6 +11,11 @@ variable "apigw_name" {}
 variable "vpc_link" {}
 variable "integration_method" {}
 
+variable "cors_methods" {
+    default = "GET,POST,PUT,DELETE"
+}
+variable "cors_origins" {}
+
 data "aws_subnet" "apigw" {
   filter {
     name = "tag:Name"
