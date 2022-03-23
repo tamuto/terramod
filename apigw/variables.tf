@@ -4,12 +4,10 @@ variable "instance_port" {
     default = "80"
 }
 variable "subnet_name" {}
-variable "secgroup_id" {}
-
-variable "apigw_name" {}
-
-variable "vpc_link" {}
-variable "integration_method" {}
+variable "vpc_name" {}
+variable secgroup_name {
+    default = "default"
+}
 
 variable "cors_methods" {
     default = "GET,POST,PUT,DELETE"
@@ -23,6 +21,14 @@ data "aws_subnet" "apigw" {
   }
 }
 
+data "aws_vpc" "vpc" {
+    filter {
+        name = "tag:Name"
+        values = [var.vpc_name]
+    }
+}
+
 data "aws_security_group" "apigw" {
-  id = var.secgroup_id
+  name = var.secgroup_name
+  vpc_id = data.aws_vpc.vpc.id
 }
