@@ -38,6 +38,7 @@ resource "aws_lambda_function" "cors" {
 
     environment {
         variables = {
+            cors_headers = var.cors_headers
             cors_methods = var.cors_methods
             cors_origins = var.cors_origins
         }
