@@ -9,14 +9,23 @@ variable secgroup_name {
     default = "default"
 }
 
-variable "cors_headers" {
-    default = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+// variable "cors_headers" {
+//    default = "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+//}
+
+//variable "cors_methods" {
+//    default = "GET,POST,PUT,DELETE"
+//}
+//variable "cors_origins" {}
+
+variable "allow_headers" {
+    default = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
 }
 
-variable "cors_methods" {
-    default = "GET,POST,PUT,DELETE"
+variable "allow_methods" {
+    default = ["GET", "POST", "PUT", "DELETE"]
 }
-variable "cors_origins" {}
+variable "allow_origins" {}
 
 data "aws_subnet" "apigw" {
   filter {
