@@ -24,6 +24,6 @@ variable "create_natgw" {
 variable "create_s3_endpoint" {
     default = false
 }
-varialbe "s3_service_name" {
+variable "s3_service_name" {
     default = "com.amazonaws.ap-northeast-1.s3"
 }
