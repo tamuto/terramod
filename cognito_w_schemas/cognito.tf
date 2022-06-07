@@ -17,7 +17,7 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
 
   admin_create_user_config {
-    allow_admin_create_user_only = true
+    allow_admin_create_user_only = false
   }
 
   username_configuration {
