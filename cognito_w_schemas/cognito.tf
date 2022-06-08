@@ -1,9 +1,7 @@
 # User Pool
 resource "aws_cognito_user_pool" "user_pool" {
   name = var.poolname
-  auto_verified_attributes = [
-    "email"
-  ]
+  auto_verified_attributes = var.auto_verified
 
   dynamic "schema" {
     for_each = var.schemas
