@@ -16,8 +16,20 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+
+    recovery_mechanism {
+      name     = "verified_phone_number"
+      priority = 2
+    }
+  }
+
   admin_create_user_config {
-    allow_admin_create_user_only = false
+    allow_admin_create_user_only = var.create_user
   }
 
   username_configuration {
