@@ -16,9 +16,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
-  auto_verified_attributes = [
-    "email",
-  ]
+  auto_verified_attributes = ["email"]
 
   admin_create_user_config {
     allow_admin_create_user_only = var.create_user
