@@ -23,6 +23,11 @@ resource "aws_cognito_user_pool" "user_pool" {
     allow_admin_create_user_only = var.create_user
   }
 
+  verification_message_template {
+    email_subject = var.email_subject
+    email_message = var.email_message
+  }
+
   username_configuration {
     case_sensitive = false
   }
