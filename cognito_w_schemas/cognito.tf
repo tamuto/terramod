@@ -35,6 +35,13 @@ resource "aws_cognito_user_pool" "user_pool" {
     temporary_password_validity_days = 7
   }
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       ### AWS doesn't allow schema updates, so every build will re-create 
