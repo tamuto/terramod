@@ -35,6 +35,11 @@ resource "aws_cognito_user_pool" "user_pool" {
     temporary_password_validity_days = 7
   }
 
+  verification_message_template {
+    email_subject = var.email_subject
+    email_message = var.email_message
+  }
+
   account_recovery_setting {
     recovery_mechanism {
       name     = var.account_recovery
