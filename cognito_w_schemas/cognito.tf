@@ -50,9 +50,13 @@ resource "aws_cognito_user_pool" "user_pool" {
   mfa_configuration          = "ON"
   sms_authentication_message = "Your code is {####}"
 
+  resource "aws_iam_role" "iam_role_mfa" {
+    name = "${var.name}"
+  }
+
   sms_configuration {
     external_id    = "2a027710-8f71-4d65-9607-d441f2d2d7f8"
-    sns_caller_arn = aws_iam_role.example.arn
+    sns_caller_arn = aws_iam_role.iam_role_mfa.arn
   }
 
   software_token_mfa_configuration {
