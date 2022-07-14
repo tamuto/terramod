@@ -47,6 +47,18 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
+  mfa_configuration          = "ON"
+  sms_authentication_message = "Your code is {####}"
+
+  sms_configuration {
+    external_id    = "2a027710-8f71-4d65-9607-d441f2d2d7f8"
+    sns_caller_arn = aws_iam_role.example.arn
+  }
+
+  software_token_mfa_configuration {
+    enabled = true
+  }
+
   lifecycle {
     ignore_changes = [
       ### AWS doesn't allow schema updates, so every build will re-create 
