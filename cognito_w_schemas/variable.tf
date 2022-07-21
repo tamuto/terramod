@@ -9,3 +9,8 @@ variable "account_recovery" {}
 variable "name" {}
 variable "mfa_configuration" {}
 variable "sms_authentication_message" {}
+variable "aws" {
+  default = {
+    sms_role_ext_id = "cognito-test-sms-role-external-id"
+  }
+}
