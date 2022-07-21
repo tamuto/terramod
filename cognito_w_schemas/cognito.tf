@@ -1,3 +1,9 @@
+variable "aws" {
+  default = {
+    sms_role_ext_id = "cognito-test-sms-role-external-id"
+  }
+}
+
 # IAM role for cognito sms
 resource "aws_iam_role" "cognito_sms" {
     name = "${var.name}_CognitoTest_SMS"
