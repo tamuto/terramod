@@ -16,5 +16,5 @@ assume_role_policy = data.aws_iam_policy_document.sms_role.json
 
 resource "aws_iam_role_policy_attachment" "aws_sns_policy_attach" {
     role = aws_iam_role.iam_role_mfa.name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonSNSReadOnlyAccess"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }
