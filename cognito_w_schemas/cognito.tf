@@ -1,3 +1,50 @@
+# IAM role for cognito sms
+resource "aws_iam_role" "cognito_sms" {
+    name = "${var.name}_CognitoTest_SMS"
+    description           = "role for applicant cognito, send sms"
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Condition = {
+                            StringEquals = {
+                                "sts:ExternalId" = "${var.aws.sms_role_ext_id}"
+                            }
+                        }
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = "cognito-idp.amazonaws.com"
+                    }
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    inline_policy {
+        name   = "cognito_sms_policy"
+        policy = jsonencode(
+            {
+                Statement = [
+                    {
+                        Action   = [
+                            "sns:publish",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "*",
+                        ]
+                    },
+                ]
+                Version   = "2012-10-17"
+            }
+        )
+    }
+    force_detach_policies = false
+    max_session_duration  = 3600
+    path                  = "/service-role/"
+}
+
 # User Pool
 resource "aws_cognito_user_pool" "user_pool" {
   name = var.poolname
@@ -52,11 +99,7 @@ resource "aws_cognito_user_pool" "user_pool" {
 
   sms_configuration {
     external_id    = "2a027710-8f71-4d65-9607-d441f2d2d7f8"
-    sns_caller_arn = aws_iam_role.iam_role_mfa.arn
-  }
-
-  software_token_mfa_configuration {
-    enabled = true
+    sns_caller_arn = aws_iam_role.cognito_sms.arn
   }
 
   lifecycle {
