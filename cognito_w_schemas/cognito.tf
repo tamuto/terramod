@@ -47,11 +47,12 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
-  mfa_configuration          = "ON"
-  sms_authentication_message = "Your code is {####}"
+  mfa_configuration          = var.mfa_configuration
+  sms_authentication_message = var.sms_authentication_message
 
   resource "aws_iam_role" "iam_role_mfa" {
     name = "${var.name}"
+    assume_role_policy = data.aws_iam_policy_document.lambda_assume_policy.json
   }
 
   sms_configuration {

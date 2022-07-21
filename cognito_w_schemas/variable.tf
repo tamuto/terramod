@@ -7,3 +7,5 @@ variable "email_subject" {}
 variable "email_message" {}
 variable "account_recovery" {}
 variable "name" {}
+variable "mfa_configuration" {}
+variable "sms_authentication_message" {}
