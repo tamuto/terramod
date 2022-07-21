@@ -1,21 +1,20 @@
 # IAM role for cognito sms
 resource "aws_iam_role" "cognito_sms" {
     name = "${var.name}_CognitoTest_SMS"
-    description           = "role for applicant cognito, send sms"
     assume_role_policy    = jsonencode(
         {
             Statement = [
                 {
-                    Condition = {
+                  Condition = {
                             StringEquals = {
                                 "sts:ExternalId" = "${var.aws.sms_role_ext_id}"
                             }
-                        }
-                    Action    = "sts:AssumeRole"
-                    Effect    = "Allow"
-                    Principal = {
-                        Service = "cognito-idp.amazonaws.com"
-                    }
+                  }
+                  Action    = "sts:AssumeRole"
+                  Effect    = "Allow"
+                  Principal = {
+                      Service = "cognito-idp.amazonaws.com"
+                  }
                 },
             ]
             Version   = "2012-10-17"
@@ -98,7 +97,7 @@ resource "aws_cognito_user_pool" "user_pool" {
   sms_authentication_message = var.sms_authentication_message
 
   sms_configuration {
-    external_id    = "2a027710-8f71-4d65-9607-d441f2d2d7f8"
+    external_id    = var.aws.sms_role_ext_id
     sns_caller_arn = aws_iam_role.cognito_sms.arn
   }
 
