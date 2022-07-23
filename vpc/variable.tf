@@ -1,12 +1,21 @@
 variable "name" {}
-variable "availability_zone" {
+variable "az_1a" {
     default = "ap-northeast-1a"
+}
+variable "az_1c" {
+    default = "ap-northeast-1c"
 }
 variable "vpc_cidr" {}
 variable "private_1a_cidr" {
     default = null
 }
 variable "public_1a_cidr" {
+    default = null
+}
+variable "private_1c_cidr" {
+    default = null
+}
+variable "public_1c_cidr" {
     default = null
 }
 variable "private_rt_is_main" {
