@@ -73,10 +73,6 @@ resource "aws_cognito_user_pool" "user_pool" {
 
   password_policy {
     minimum_length = 8
-    require_lowercase = true
-    require_uppercase = true
-    require_numbers = true
-    require_symbols = true
   }
 
   verification_message_template {
