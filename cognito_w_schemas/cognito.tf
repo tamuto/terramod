@@ -21,23 +21,17 @@ resource "aws_iam_role" "cognito_sms" {
         }
     )
     inline_policy {
-        name   = "cognito_sms_policy"
-        policy = jsonencode(
-            {
-                Statement = [
-                    {
-                        Action   = [
-                            "sns:publish",
-                        ]
-                        Effect   = "Allow"
-                        Resource = [
-                            "*",
-                        ]
-                    },
-                ]
-                Version   = "2012-10-17"
-            }
-        )
+      name   = "cognito_sms_policy"
+      policy = jsonencode({
+        Version   = "2012-10-17"
+        Statement = [
+          {
+            Action   = ["sns:publish"]
+            Effect   = "Allow"
+            Resource = "*"
+          },
+        ]
+      })
     }
     force_detach_policies = false
     max_session_duration  = 3600
