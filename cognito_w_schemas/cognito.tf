@@ -32,7 +32,7 @@ resource "aws_iam_role" "cognito_sms" {
               "sns:SetSMSAttributes",
               "sns:GetSMSAttributes",
               "sns:OptInPhoneNumber",
-              "sns:CheckIfPhoneNumberIsOptedOut"
+              "sns:CheckIfPhoneNumberIsOptedOut",
               "sns:CreateSMSSandboxPhoneNumber"
               ]
             Effect   = "Allow"
