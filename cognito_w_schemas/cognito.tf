@@ -26,7 +26,14 @@ resource "aws_iam_role" "cognito_sms" {
         Version   = "2012-10-17"
         Statement = [
           {
-            Action   = ["sns:publish"]
+            Action   = [
+              "sns:ListPhoneNumbersOptedOut",
+              "sns:Publish",
+              "sns:SetSMSAttributes",
+              "sns:GetSMSAttributes",
+              "sns:OptInPhoneNumber",
+              "sns:CheckIfPhoneNumberIsOptedOut"
+              ]
             Effect   = "Allow"
             Resource = "*"
           },
