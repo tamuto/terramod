@@ -1,51 +1,3 @@
-# IAM role for cognito sms
-resource "aws_iam_role" "cognito_sms" {
-    name_prefix = "${var.name}_CognitoTest_SMS"
-    assume_role_policy    = jsonencode(
-        {
-            Statement = [
-                {
-                  Condition = {
-                            StringEquals = {
-                                "sts:ExternalId" = "${var.aws.sms_role_ext_id}"
-                            }
-                  }
-                  Action    = "sts:AssumeRole"
-                  Effect    = "Allow"
-                  Principal = {
-                      Service = "cognito-idp.amazonaws.com"
-                  }
-                },
-            ]
-            Version   = "2012-10-17"
-        }
-    )
-    inline_policy {
-      name   = "cognito_sms_policy"
-      policy = jsonencode({
-        Version   = "2012-10-17"
-        Statement = [
-          {
-            Action   = [
-              "sns:ListPhoneNumbersOptedOut",
-              "sns:Publish",
-              "sns:SetSMSAttributes",
-              "sns:GetSMSAttributes",
-              "sns:OptInPhoneNumber",
-              "sns:CheckIfPhoneNumberIsOptedOut",
-              "sns:CreateSMSSandboxPhoneNumber"
-              ]
-            Effect   = "Allow"
-            Resource = "*"
-          },
-        ]
-      })
-    }
-    force_detach_policies = false
-    max_session_duration  = 3600
-    path                  = "/service-role/"
-}
-
 # User Pool
 resource "aws_cognito_user_pool" "user_pool" {
   name = var.poolname
@@ -93,12 +45,6 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
 
   mfa_configuration          = var.mfa_configuration
-  sms_authentication_message = var.sms_authentication_message
-
-  sms_configuration {
-    external_id    = var.aws.sms_role_ext_id
-    sns_caller_arn = aws_iam_role.cognito_sms.arn
-  }
 
   lifecycle {
     ignore_changes = [
