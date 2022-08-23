@@ -6,4 +6,5 @@ variable "create_user" {}
 variable "email_subject" {}
 variable "email_message" {}
 variable "account_recovery" {}
+variable "mfa_configuration" {}
 variable "name" {}

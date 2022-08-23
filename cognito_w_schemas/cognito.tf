@@ -44,6 +44,8 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
+  mfa_configuration = var.mfa_configuration
+
   lifecycle {
     ignore_changes = [
       ### AWS doesn't allow schema updates, so every build will re-create 
