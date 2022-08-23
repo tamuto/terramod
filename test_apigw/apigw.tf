@@ -15,21 +15,33 @@ resource "aws_apigatewayv2_stage" "apigw" {
   auto_deploy = true
 }
 
+
 # resource "aws_apigatewayv2_vpc_link" "apigw" {
 #   name               = "${var.name}-link"
 #   security_group_ids = [data.aws_security_group.apigw.id]
 #   subnet_ids         = [data.aws_subnet.apigw.id]
 # }
 
-resource "aws_apigatewayv2_integration" "apigw" {
-  api_id           = aws_apigatewayv2_api.apigw.id
-  integration_type = "HTTP_PROXY"
-  integration_uri  = aws_service_discovery_service.ns.arn
-  integration_method = "ANY"
+# resource "aws_apigatewayv2_integration" "apigw" {
+#   api_id           = aws_apigatewayv2_api.apigw.id
+#   integration_type = "HTTP_PROXY"
+#   integration_uri  = aws_service_discovery_service.ns.arn
+#   integration_method = "ANY"
+# resource "aws_apigatewayv2_route" "apigw" {
+#   api_id    = aws_apigatewayv2_api.apigw.id
+#   route_key = "ANY /{proxy+}"
+#   target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
+# }
 
-  connection_type    = "VPC_LINK"
-  connection_id      = aws_apigatewayv2_vpc_link.apigw.id
-}
+# resource "aws_apigatewayv2_route" "cors" {
+#   api_id = aws_apigatewayv2_api.apigw.id
+#   route_key = "OPTIONS /{proxy+}"
+#   target = "integrations/${aws_apigatewayv2_integration.cors.id}"
+# }
+
+#   connection_type    = "VPC_LINK"
+#   connection_id      = aws_apigatewayv2_vpc_link.apigw.id
+# }
 
 # resource "aws_apigatewayv2_integration" "cors" {
 #   api_id = aws_apigatewayv2_api.apigw.id
@@ -37,17 +49,6 @@ resource "aws_apigatewayv2_integration" "apigw" {
 #   integration_uri = aws_lambda_function.cors.arn
 #   payload_format_version = "2.0"
 # }
-resource "aws_apigatewayv2_route" "apigw" {
-  api_id    = aws_apigatewayv2_api.apigw.id
-  route_key = "ANY /{proxy+}"
-  target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
-}
-
-resource "aws_apigatewayv2_route" "cors" {
-  api_id = aws_apigatewayv2_api.apigw.id
-  route_key = "OPTIONS /{proxy+}"
-  target = "integrations/${aws_apigatewayv2_integration.cors.id}"
-}
 
 # resource "aws_lambda_permission" "cors" {
 #   function_name = aws_lambda_function.cors.arn
