@@ -11,3 +11,10 @@ data "template_file" "swagger" {
     aws_region_name         = "ap-northeast-1"
   }
 }
+
+resource "aws_api_gateway_authorizer" "api_authorizer" {
+  name          = "CognitoUserPoolAuthorizer"
+  type          = "COGNITO_USER_POOLS"
+  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
+  provider_arns = [var.cognito_user_arn]
+}
