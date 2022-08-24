@@ -1,6 +1,7 @@
 resource "aws_api_gateway_rest_api" "example" {
   name        = "EstQ_Dev_API"
   description = "example API Gateway"
+  disable_execute_api_endpoint = true
   body        = "${data.template_file.swagger.rendered}"
 }
 data "template_file" "swagger" {
