@@ -1,12 +1,11 @@
 resource "aws_api_gateway_rest_api" "example" {
-  name        = var.name
+  name        = "EstQ_Dev_API"
   description = var.description
   disable_execute_api_endpoint = true
   body        = "${data.template_file.swagger.rendered}"
 }
 data "template_file" "swagger" {
   template = templatefile(var.template, {
-    "title": "${var.name}"
     "description": "${var.description}"
     "Authorizer_name": "${aws_api_gateway_authorizer.api_authorizer.name}"
     "providerARNs": "${var.cognito_user_arn}"
