@@ -5,8 +5,8 @@ resource "aws_api_gateway_rest_api" "example" {
 }
 data "template_file" "swagger" {
   template = templatefile(var.template, {
-    "Authorizer_name": "CognitoUserPoolAuthorizer"
-    "providerARNs": "${var.cognito_user_arn}"
+    Authorizer_name = "${aws_api_gateway_authorizer.api_authorizer.name}"
+    providerARNs = "${var.cognito_user_arn}"
   })
 
   vars = {
