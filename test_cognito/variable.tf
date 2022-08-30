@@ -9,6 +9,5 @@ variable "account_recovery" {}
 variable "mfa_configuration" {}
 variable "name" {}
 variable "identity_email" {}
-variable "identity_name" {}
-variable "from_name" {}
+variable "from_email_address" {}
 variable "identity_arn" {}

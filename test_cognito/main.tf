@@ -55,7 +55,7 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
   email_configuration {
     source_arn = data.aws_ses_email_identity.example.arn
-    from_email_address = "DATALINK<yuuki.tagaku@gmail.com>"
+    from_email_address = var.from_email_address
     email_sending_account = "DEVELOPER"
   }
 }
