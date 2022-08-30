@@ -9,7 +9,7 @@ data "template_file" "swagger" {
   vars = {
     title                   = "EstQ_Dev_API"
     aws_region_name         = "ap-northeast-1"
-    Authorizer_name = "${aws_api_gateway_authorizer.api_authorizer.name}"
+    authorizer_name = "${aws_api_gateway_authorizer.api_authorizer.name}"
     # providerARNs = "${var.cognito_user_arn}"
   }
 }
