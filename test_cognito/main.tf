@@ -44,7 +44,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
-  mfa_configuration = var.mfa_configuration
+#   mfa_configuration = var.mfa_configuration
 
   lifecycle {
     ignore_changes = [
