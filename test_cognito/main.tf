@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "example" {
   }
 }
 
-resource "aws_ses_identity_policy" "example" {
+data "aws_ses_identity_policy" "example" {
   identity = data.aws_ses_email_identity.example.arn
   name     = var.identity_name
   policy   = data.aws_iam_policy_document.example.json
