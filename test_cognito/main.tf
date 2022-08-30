@@ -71,7 +71,7 @@ resource "aws_cognito_user_pool_client" "pool_client" {
 
 }
 
-data "aws_ses_email_identity" "example" {
+resource "aws_ses_email_identity" "example" {
   email = var.identity_email
 }
 
