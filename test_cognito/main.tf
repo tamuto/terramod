@@ -54,7 +54,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     ]
   }
   email_configuration {
-    source_arn = "${aws_ses_email_identity.example.arn}"
+    source_arn = var.identity_arn
     from_email_address = "${var.from_name} <${var.identity_email}>}"
     email_sending_account = "DEVELOPER"
   }

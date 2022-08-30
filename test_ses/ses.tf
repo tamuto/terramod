@@ -5,7 +5,7 @@ resource "aws_ses_email_identity" "example" {
 data "aws_iam_policy_document" "example" {
   statement {
     actions   = ["SES:SendEmail"]
-    resources = [aws_ses_email_identity.example.arn]
+    resources = ["${aws_ses_email_identity.example.arn}"]
 
     principals {
       identifiers = ["*"]
