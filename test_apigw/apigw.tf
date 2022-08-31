@@ -1,22 +1,83 @@
-resource "aws_api_gateway_rest_api" "example" {
-  name        = "EstQ_Dev_API"
-  disable_execute_api_endpoint = true
-  body        = "${data.template_file.swagger.rendered}"
-}
-data "template_file" "swagger" {
-  template = var.template
+# data "aws_subnet" "apigw" {
+#   filter {
+#     name   = "tag:Name"
+#     values = [var.subnet_name]
+#   }
+# }
 
-  vars = {
-    title                   = "EstQ_Dev_API"
-    aws_region_name         = "ap-northeast-1"
-    authorizer_name = "${aws_api_gateway_authorizer.api_authorizer.name}"
-    # providerARNs = "${var.cognito_user_arn}"
+# data "aws_vpc" "vpc" {
+#   filter {
+#     name   = "tag:Name"
+#     values = [var.vpc_name]
+#   }
+# }
+
+# data "aws_security_group" "apigw" {
+#   name   = var.secgroup_name
+#   vpc_id = data.aws_vpc.vpc.id
+# }
+
+resource "aws_apigatewayv2_api" "apigw" {
+  name                         = "${var.name}-apigw"
+  protocol_type                = "HTTP"
+  disable_execute_api_endpoint = true
+
+  cors_configuration {
+    allow_headers = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-echo", "member_id", "admin_id"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE"]
+    # TODO: 調査と書き換え
+    allow_origins = ["*"]
   }
 }
 
-resource "aws_api_gateway_authorizer" "api_authorizer" {
-  name          = "CognitoUserPoolAuthorizer"
-  type          = "COGNITO_USER_POOLS"
-  rest_api_id   = "${aws_api_gateway_rest_api.example.id}"
-  provider_arns = [var.cognito_user_arn]
+data "aws_cognito_user_pool_client" "apigw_userAuth" {
+  client_id = "1vcce1l5qf7v152itecjo2t323" # TODO: 変数化
+  user_pool_id = "ap-northeast-1_sxDSNOkhu" # TODO: 変数化
 }
+
+resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
+    api_id = aws_apigatewayv2_api.apigw.id
+    authorizer_type = "JWT"
+    identity_sources = ["$request.header.Authorization"]
+    name = "cognito"
+    jwt_configuration {
+        audience = ["${data.aws_cognito_user_pool_client.apigw_userAuth.client_id}"]
+        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_client.apigw_userAuth.user_pool_id}"
+    }
+}
+
+resource "aws_apigatewayv2_stage" "apigw_st" {
+  api_id      = aws_apigatewayv2_api.apigw.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+resource "aws_apigatewayv2_integration" "apigw_http" {
+  api_id             = aws_apigatewayv2_api.apigw.id
+  integration_type   = "HTTP_PROXY"
+  integration_method = "ANY"
+  integration_uri = "https://api.auth.ap-northeast-1.amazoncognito.com/{proxy}"
+}
+
+resource "aws_apigatewayv2_route" "apigw_rt" {
+  api_id    = aws_apigatewayv2_api.apigw.id
+  route_key = "ANY /api/{proxy+}"
+}
+
+resource "aws_apigatewayv2_route" "apigw_rt_auth_user" {
+  api_id    = aws_apigatewayv2_api.apigw.id
+  route_key = "ANY /user_auth/{proxy+}"
+  authorization_type = "JWT"
+  authorizer_id = aws_apigatewayv2_authorizer.apigw_userAuth.id
+}
+
+resource "aws_apigatewayv2_route" "apigw_rt_auth_manager" {
+  api_id    = aws_apigatewayv2_api.apigw.id
+  route_key = "ANY /manager_auth/{proxy+}"
+}
+
+# resource "aws_apigatewayv2_vpc_link" "Test_API_vpc" {
+#   name               = "${var.name}-link"
+#   security_group_ids = [data.aws_security_group.apigw.id]
+#   subnet_ids         = [data.aws_subnet.apigw.id]
+# }
