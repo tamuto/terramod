@@ -31,8 +31,13 @@ resource "aws_apigatewayv2_api" "apigw" {
 }
 
 data "aws_cognito_user_pool_client" "apigw_userAuth" {
-  client_id = var.cognito_client_id
+  client_id = var.cognito_user_client_id
   user_pool_id = var.cognito_user_pool_id
+}
+
+data "aws_cognito_user_pool_client" "apigw_managerAuth" {
+  client_id = var.cognito_manager_client_id
+  user_pool_id = var.cognito_manager_pool_id
 }
 
 resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
@@ -74,6 +79,8 @@ resource "aws_apigatewayv2_route" "apigw_rt_auth_user" {
 resource "aws_apigatewayv2_route" "apigw_rt_auth_manager" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /manager_auth/{proxy+}"
+  authorization_type = "JWT"
+  authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
 }
 
 # resource "aws_apigatewayv2_vpc_link" "Test_API_vpc" {
