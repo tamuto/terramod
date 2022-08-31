@@ -44,10 +44,21 @@ resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
     api_id = aws_apigatewayv2_api.apigw.id
     authorizer_type = "JWT"
     identity_sources = ["$request.header.Authorization"]
-    name = "cognito"
+    name = "cognito-user"
     jwt_configuration {
         audience = ["${data.aws_cognito_user_pool_client.apigw_userAuth.client_id}"]
         issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_client.apigw_userAuth.user_pool_id}"
+    }
+}
+
+resource "aws_apigatewayv2_authorizer" "apigw_managerAuth" {
+    api_id = aws_apigatewayv2_api.apigw.id
+    authorizer_type = "JWT"
+    identity_sources = ["$request.header.Authorization"]
+    name = "cognito-manager"
+    jwt_configuration {
+        audience = ["${data.aws_cognito_user_pool_client.apigw_managerAuth.client_id}"]
+        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_client.apigw_managerAuth.user_pool_id}"
     }
 }
 
