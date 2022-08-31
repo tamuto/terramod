@@ -31,8 +31,8 @@ resource "aws_apigatewayv2_api" "apigw" {
 }
 
 data "aws_cognito_user_pool_client" "apigw_userAuth" {
-  client_id = "1vcce1l5qf7v152itecjo2t323" # TODO: 変数化
-  user_pool_id = "ap-northeast-1_sxDSNOkhu" # TODO: 変数化
+  client_id = var.cognito_client_id
+  user_pool_id = var.cognito_user_pool_id
 }
 
 resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
