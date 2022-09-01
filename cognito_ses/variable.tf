@@ -10,4 +10,3 @@ variable "mfa_configuration" {}
 variable "name" {}
 variable "identity_email" {}
 variable "from_email_address" {}
-variable "identity_arn" {}

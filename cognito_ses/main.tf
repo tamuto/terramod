@@ -44,7 +44,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     }
   }
 
-#   mfa_configuration = var.mfa_configuration?
+  mfa_configuration = var.mfa_configuration
 
   lifecycle {
     ignore_changes = [
@@ -68,10 +68,8 @@ resource "aws_cognito_user_pool_client" "pool_client" {
 
   ### LEGACY or ENABLED (AWSの推奨はENABLED)
   prevent_user_existence_errors = "ENABLED"
-
 }
 
 data "aws_ses_email_identity" "example" {
   email = var.identity_email
-
 }

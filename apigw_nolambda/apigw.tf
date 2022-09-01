@@ -23,10 +23,9 @@ resource "aws_apigatewayv2_api" "apigw" {
   disable_execute_api_endpoint = true
 
   cors_configuration {
-    allow_headers = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-echo", "member_id", "admin_id"]
-    allow_methods = ["GET", "POST", "PUT", "DELETE"]
-    # TODO: 調査と書き換え
-    allow_origins = ["*"]
+    allow_headers = var.allow_headers
+    allow_methods = var.allow_methods
+    allow_origins = var.allow_origins
   }
 }
 
