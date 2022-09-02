@@ -86,31 +86,37 @@ resource "aws_apigatewayv2_route" "apigw_managerAuth" {
   authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
 }
 
-resource "aws_apigatewayv2_route" "cors" {
-  api_id = aws_apigatewayv2_api.apigw.id
-  route_key = "OPTIONS /{proxy+}"
-  target = "integrations/${aws_apigatewayv2_integration.cors.id}"
-}
+# resource "aws_apigatewayv2_route" "cors" {
+#   api_id = aws_apigatewayv2_api.apigw.id
+#   route_key = "OPTIONS /{proxy+}"
+#   target = "integrations/${aws_apigatewayv2_integration.cors.id}"
+# }
 
 resource "aws_apigatewayv2_stage" "apigw" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$api"
   auto_deploy = true
-  route_settings = "${aws_apigatewayv2_route.apigw}"
+  route_settings = {
+    route_key = "ANY /{proxy+}"
+  }
 }
 
 resource "aws_apigatewayv2_stage" "apigw_user" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$user"
   auto_deploy = true
-  route_settings = "${aws_apigatewayv2_route.apigw_userAuth}"
+  route_settings = {
+    route_key = "ANY /user_auth/{proxy+}"
+  }
 }
 
 resource "aws_apigatewayv2_stage" "apigw_manager" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$manager"
   auto_deploy = true
-  route_settings = "${aws_apigatewayv2_route.apigw_managerAuth}"
+  route_settings = {
+    route_key = "ANY /manager_auth/{proxy+}"
+  }
 }
 
 # resource "aws_apigatewayv2_vpc_link" "apigw" {
