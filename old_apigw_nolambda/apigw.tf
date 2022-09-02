@@ -1,3 +1,4 @@
+#apigwのフォルダの構成をapigw_nolambda内で構成しオーソライザーの箇所を書き換える
 # data "aws_subnet" "apigw" {
 #   filter {
 #     name   = "tag:Name"
