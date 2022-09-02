@@ -76,7 +76,7 @@ resource "aws_apigatewayv2_route" "apigw" {
   target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
 }
 
-resource "aws_apigatewayv2_route" "apigw" {
+resource "aws_apigatewayv2_route" "apigw_userAuth" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /user_auth/{proxy+}"
   target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
@@ -84,7 +84,7 @@ resource "aws_apigatewayv2_route" "apigw" {
   authorizer_id = aws_apigatewayv2_authorizer.apigw_userAuth.id
 }
 
-resource "aws_apigatewayv2_route" "apigw" {
+resource "aws_apigatewayv2_route" "apigw_managerAuth" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /manager_auth/{proxy+}"
   target = "integrations/${aws_apigatewayv2_integration.apigw.id}"

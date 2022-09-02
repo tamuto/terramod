@@ -27,6 +27,9 @@ variable "allow_methods" {
 }
 variable "allow_origins" {}
 
+variable "user_poolname" {}
+variable "manager_poolname" {}
+
 data "aws_subnet" "apigw" {
   filter {
     name = "tag:Name"

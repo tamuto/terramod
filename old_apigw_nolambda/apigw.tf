@@ -30,43 +30,43 @@ resource "aws_apigatewayv2_api" "apigw" {
   }
 }
 
-data "aws_cognito_user_pools" "user_selected" {
-  name = var.user_poolname
-}
+# data "aws_cognito_user_pools" "user_selected" {
+#   name = var.user_poolname
+# }
 
-data "aws_cognito_user_pool_clients" "user_main" {
-  user_pool_id = data.aws_cognito_user_pools.user_selected.ids[0]
-}
+# data "aws_cognito_user_pool_clients" "user_main" {
+#   user_pool_id = data.aws_cognito_user_pools.user_selected.ids[0]
+# }
 
-data "aws_cognito_user_pools" "manager_selected" {
-  name = var.manager_poolname
-}
+# data "aws_cognito_user_pools" "manager_selected" {
+#   name = var.manager_poolname
+# }
 
-data "aws_cognito_user_pool_clients" "manager_main" {
-  user_pool_id = data.aws_cognito_user_pools.manager_selected.ids[0]
-}
+# data "aws_cognito_user_pool_clients" "manager_main" {
+#   user_pool_id = data.aws_cognito_user_pools.manager_selected.ids[0]
+# }
 
-resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
-    api_id = aws_apigatewayv2_api.apigw.id
-    authorizer_type = "JWT"
-    identity_sources = ["$request.header.Authorization"]
-    name = "cognito-user"
-    jwt_configuration {
-        audience = ["${data.aws_cognito_user_pool_clients.user_main.client_ids[0]}"]
-        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.user_main.user_pool_id}"
-    }
-}
+# resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
+#     api_id = aws_apigatewayv2_api.apigw.id
+#     authorizer_type = "JWT"
+#     identity_sources = ["$request.header.Authorization"]
+#     name = "cognito-user"
+#     jwt_configuration {
+#         audience = ["${data.aws_cognito_user_pool_clients.user_main.client_ids[0]}"]
+#         issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.user_main.user_pool_id}"
+#     }
+# }
 
-resource "aws_apigatewayv2_authorizer" "apigw_managerAuth" {
-    api_id = aws_apigatewayv2_api.apigw.id
-    authorizer_type = "JWT"
-    identity_sources = ["$request.header.Authorization"]
-    name = "cognito-manager"
-    jwt_configuration {
-        audience = ["${data.aws_cognito_user_pool_clients.manager_main.client_ids[0]}"]
-        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.manager_main.user_pool_id}"
-    }
-}
+# resource "aws_apigatewayv2_authorizer" "apigw_managerAuth" {
+#     api_id = aws_apigatewayv2_api.apigw.id
+#     authorizer_type = "JWT"
+#     identity_sources = ["$request.header.Authorization"]
+#     name = "cognito-manager"
+#     jwt_configuration {
+#         audience = ["${data.aws_cognito_user_pool_clients.manager_main.client_ids[0]}"]
+#         issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.manager_main.user_pool_id}"
+#     }
+# }
 
 resource "aws_apigatewayv2_stage" "apigw_st" {
   api_id      = aws_apigatewayv2_api.apigw.id
@@ -89,15 +89,15 @@ resource "aws_apigatewayv2_route" "apigw_rt" {
 resource "aws_apigatewayv2_route" "apigw_rt_auth_user" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /user_auth/{proxy+}"
-  authorization_type = "JWT"
-  authorizer_id = aws_apigatewayv2_authorizer.apigw_userAuth.id
+  # authorization_type = "JWT"
+  # authorizer_id = aws_apigatewayv2_authorizer.apigw_userAuth.id
 }
 
 resource "aws_apigatewayv2_route" "apigw_rt_auth_manager" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /manager_auth/{proxy+}"
-  authorization_type = "JWT"
-  authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
+  # authorization_type = "JWT"
+  # authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
 }
 
 # resource "aws_apigatewayv2_vpc_link" "apigw_vpc" {
