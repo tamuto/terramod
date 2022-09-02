@@ -1,27 +1,6 @@
-#apigwのフォルダの構成をapigw_nolambda内で構成しオーソライザーの箇所を書き換える
-# data "aws_subnet" "apigw" {
-#   filter {
-#     name   = "tag:Name"
-#     values = [var.subnet_name]
-#   }
-# }
-
-# data "aws_vpc" "vpc" {
-#   filter {
-#     name   = "tag:Name"
-#     values = [var.vpc_name]
-#   }
-# }
-
-# data "aws_security_group" "apigw" {
-#   name   = var.secgroup_name
-#   vpc_id = data.aws_vpc.vpc.id
-# }
-
 resource "aws_apigatewayv2_api" "apigw" {
-  name                         = "${var.name}-apigw"
-  protocol_type                = "HTTP"
-  disable_execute_api_endpoint = true
+  name = "${var.name}-apigw"
+  protocol_type = "HTTP"
 
   cors_configuration {
     allow_headers = var.allow_headers
@@ -68,40 +47,82 @@ resource "aws_apigatewayv2_authorizer" "apigw_managerAuth" {
     }
 }
 
-resource "aws_apigatewayv2_stage" "apigw_st" {
-  api_id      = aws_apigatewayv2_api.apigw.id
-  name        = "$default"
-  auto_deploy = true
-}
-
-resource "aws_apigatewayv2_integration" "apigw_http" {
-  api_id             = aws_apigatewayv2_api.apigw.id
-  integration_type   = "HTTP_PROXY"
+resource "aws_apigatewayv2_integration" "apigw" {
+  api_id           = aws_apigatewayv2_api.apigw.id
+  integration_type = "HTTP_PROXY"
+  # integration_uri  = aws_service_discovery_service.ns.arn
   integration_method = "ANY"
-  integration_uri = "https://api.auth.ap-northeast-1.amazoncognito.com/{proxy}"
+
+  # connection_type    = "VPC_LINK"
+  # connection_id      = aws_apigatewayv2_vpc_link.apigw.id
 }
 
-resource "aws_apigatewayv2_route" "apigw_rt" {
+resource "aws_apigatewayv2_integration" "cors" {
+  api_id = aws_apigatewayv2_api.apigw.id
+  integration_type = "AWS_PROXY"
+  integration_uri = aws_lambda_function.cors.arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "apigw" {
   api_id    = aws_apigatewayv2_api.apigw.id
-  route_key = "ANY /api/{proxy+}"
+  route_key = "ANY /{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
 }
 
-resource "aws_apigatewayv2_route" "apigw_rt_auth_user" {
+resource "aws_apigatewayv2_route" "apigw_userAuth" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /user_auth/{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
   authorization_type = "JWT"
   authorizer_id = aws_apigatewayv2_authorizer.apigw_userAuth.id
 }
 
-resource "aws_apigatewayv2_route" "apigw_rt_auth_manager" {
+resource "aws_apigatewayv2_route" "apigw_managerAuth" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /manager_auth/{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.apigw.id}"
   authorization_type = "JWT"
   authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
 }
 
-# resource "aws_apigatewayv2_vpc_link" "apigw_vpc" {
+resource "aws_apigatewayv2_route" "cors" {
+  api_id = aws_apigatewayv2_api.apigw.id
+  route_key = "OPTIONS /{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.cors.id}"
+}
+
+resource "aws_apigatewayv2_stage" "apigw" {
+  api_id = aws_apigatewayv2_api.apigw.id
+  name   = "$api"
+  auto_deploy = true
+  route_settings = "${aws_apigatewayv2_route.apigw}"
+}
+
+resource "aws_apigatewayv2_stage" "apigw" {
+  api_id = aws_apigatewayv2_api.apigw.id
+  name   = "$user"
+  auto_deploy = true
+  route_settings = "${aws_apigatewayv2_route.apigw_userAuth}"
+}
+
+resource "aws_apigatewayv2_stage" "apigw" {
+  api_id = aws_apigatewayv2_api.apigw.id
+  name   = "$manager"
+  auto_deploy = true
+  route_settings = "${aws_apigatewayv2_route.apigw_managerAuth}"
+}
+
+# resource "aws_apigatewayv2_vpc_link" "apigw" {
 #   name               = "${var.name}-link"
 #   security_group_ids = [data.aws_security_group.apigw.id]
 #   subnet_ids         = [data.aws_subnet.apigw.id]
+# }
+
+# resource "aws_lambda_permission" "cors" {
+#   function_name = aws_lambda_function.cors.arn
+#   principal = "apigateway.amazonaws.com"
+#   action = "lambda:InvokeFunction"
+
+#   source_arn = "${aws_apigatewayv2_api.apigw.execution_arn}/*/*"
 # }
