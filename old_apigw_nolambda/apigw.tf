@@ -97,7 +97,7 @@ resource "aws_apigatewayv2_stage" "apigw" {
   name   = "$api"
   auto_deploy = true
   route_settings = {
-    route_key = "ANY /{proxy+}"
+    route_key = "${aws_apigatewayv2_route.apigw.route_key}"
   }
   depends_on = [
     aws_apigatewayv2_route.apigw,
@@ -109,7 +109,7 @@ resource "aws_apigatewayv2_stage" "apigw_user" {
   name   = "$user"
   auto_deploy = true
   route_settings = {
-    route_key = "ANY /user_auth/{proxy+}"
+    route_key = "${aws_apigatewayv2_route.apigw_userAuth.route_key}"
   }
   depends_on = [
     aws_apigatewayv2_route.apigw_userAuth,
@@ -121,7 +121,7 @@ resource "aws_apigatewayv2_stage" "apigw_manager" {
   name   = "$manager"
   auto_deploy = true
   route_settings = {
-    route_key = "ANY /manager_auth/{proxy+}"
+    route_key = "${aws_apigatewayv2_route.apigw_managerAuth.route_key}"
   }
   depends_on = [
     aws_apigatewayv2_route.apigw_managerAuth,
