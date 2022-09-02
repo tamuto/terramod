@@ -99,14 +99,14 @@ resource "aws_apigatewayv2_stage" "apigw" {
   route_settings = "${aws_apigatewayv2_route.apigw}"
 }
 
-resource "aws_apigatewayv2_stage" "apigw" {
+resource "aws_apigatewayv2_stage" "apigw_user" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$user"
   auto_deploy = true
   route_settings = "${aws_apigatewayv2_route.apigw_userAuth}"
 }
 
-resource "aws_apigatewayv2_stage" "apigw" {
+resource "aws_apigatewayv2_stage" "apigw_manager" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$manager"
   auto_deploy = true
