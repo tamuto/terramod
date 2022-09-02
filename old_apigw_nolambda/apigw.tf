@@ -99,6 +99,9 @@ resource "aws_apigatewayv2_stage" "apigw" {
   route_settings = {
     route_key = "ANY /{proxy+}"
   }
+  depends_on = [
+    aws_apigatewayv2_route.apigw,
+  ]
 }
 
 resource "aws_apigatewayv2_stage" "apigw_user" {
@@ -108,6 +111,9 @@ resource "aws_apigatewayv2_stage" "apigw_user" {
   route_settings = {
     route_key = "ANY /user_auth/{proxy+}"
   }
+  depends_on = [
+    aws_apigatewayv2_route.apigw_userAuth,
+  ]
 }
 
 resource "aws_apigatewayv2_stage" "apigw_manager" {
@@ -117,6 +123,9 @@ resource "aws_apigatewayv2_stage" "apigw_manager" {
   route_settings = {
     route_key = "ANY /manager_auth/{proxy+}"
   }
+  depends_on = [
+    aws_apigatewayv2_route.apigw_managerAuth,
+  ]
 }
 
 # resource "aws_apigatewayv2_vpc_link" "apigw" {
