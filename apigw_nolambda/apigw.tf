@@ -29,14 +29,20 @@ resource "aws_apigatewayv2_api" "apigw" {
   }
 }
 
-data "aws_cognito_user_pool_client" "apigw_userAuth" {
-  client_id = var.cognito_user_client_id
-  user_pool_id = var.cognito_user_pool_id
+data "aws_cognito_user_pools" "user_selected" {
+  name = var.user_poolname
 }
 
-data "aws_cognito_user_pool_client" "apigw_managerAuth" {
-  client_id = var.cognito_manager_client_id
-  user_pool_id = var.cognito_manager_pool_id
+data "aws_cognito_user_pool_clients" "user_main" {
+  user_pool_id = data.aws_cognito_user_pools.user_selected.ids[0]
+}
+
+data "aws_cognito_user_pools" "manager_selected" {
+  name = var.manager_poolname
+}
+
+data "aws_cognito_user_pool_clients" "manager_main" {
+  user_pool_id = data.aws_cognito_user_pools.manager_selected.ids[0]
 }
 
 resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
@@ -45,8 +51,8 @@ resource "aws_apigatewayv2_authorizer" "apigw_userAuth" {
     identity_sources = ["$request.header.Authorization"]
     name = "cognito-user"
     jwt_configuration {
-        audience = ["${data.aws_cognito_user_pool_client.apigw_userAuth.client_id}"]
-        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_client.apigw_userAuth.user_pool_id}"
+        audience = ["${data.aws_cognito_user_pool_clients.user_main.client_ids[0]}"]
+        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.user_main.user_pool_id}"
     }
 }
 
@@ -56,8 +62,8 @@ resource "aws_apigatewayv2_authorizer" "apigw_managerAuth" {
     identity_sources = ["$request.header.Authorization"]
     name = "cognito-manager"
     jwt_configuration {
-        audience = ["${data.aws_cognito_user_pool_client.apigw_managerAuth.client_id}"]
-        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_client.apigw_managerAuth.user_pool_id}"
+        audience = ["${data.aws_cognito_user_pool_clients.manager_main.client_ids[0]}"]
+        issuer = "https://cognito-idp.ap-northeast-1.amazonaws.com/${data.aws_cognito_user_pool_clients.manager_main.user_pool_id}"
     }
 }
 
@@ -93,7 +99,7 @@ resource "aws_apigatewayv2_route" "apigw_rt_auth_manager" {
   authorizer_id = aws_apigatewayv2_authorizer.apigw_managerAuth.id
 }
 
-# resource "aws_apigatewayv2_vpc_link" "Test_API_vpc" {
+# resource "aws_apigatewayv2_vpc_link" "apigw_vpc" {
 #   name               = "${var.name}-link"
 #   security_group_ids = [data.aws_security_group.apigw.id]
 #   subnet_ids         = [data.aws_subnet.apigw.id]

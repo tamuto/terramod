@@ -11,3 +11,5 @@ variable "allow_methods" {
     default = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }
 variable "allow_origins" {}
+variable "user_poolname" {}
+variable "manager_poolname" {}
