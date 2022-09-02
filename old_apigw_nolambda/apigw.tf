@@ -57,12 +57,12 @@ resource "aws_apigatewayv2_integration" "apigw" {
   # connection_id      = aws_apigatewayv2_vpc_link.apigw.id
 }
 
-resource "aws_apigatewayv2_integration" "cors" {
-  api_id = aws_apigatewayv2_api.apigw.id
-  integration_type = "AWS_PROXY"
-  integration_uri = aws_lambda_function.cors.arn
-  payload_format_version = "2.0"
-}
+# resource "aws_apigatewayv2_integration" "cors" {
+#   api_id = aws_apigatewayv2_api.apigw.id
+#   integration_type = "AWS_PROXY"
+#   integration_uri = aws_lambda_function.cors.arn
+#   payload_format_version = "2.0"
+# }
 
 resource "aws_apigatewayv2_route" "apigw" {
   api_id    = aws_apigatewayv2_api.apigw.id
