@@ -58,7 +58,6 @@ resource "aws_cognito_user_pool" "user_pool" {
     from_email_address = var.from_email_address
     email_sending_account = "DEVELOPER"
   }
-  #Cognito_w_schemasのSES設定追加で実行ファイル側にソースを追加したい
 }
 
 # App Client
@@ -74,4 +73,3 @@ resource "aws_cognito_user_pool_client" "pool_client" {
 data "aws_ses_email_identity" "example" {
   email = var.identity_email
 }
-#Cognito_w_schemasのSES設定追加で実行ファイル側にソースを追加したい
