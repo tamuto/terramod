@@ -13,6 +13,11 @@ resource "aws_apigatewayv2_stage" "apigw" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$default"
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = ""
+    format = ""
+    }
 }
 
 data "aws_cognito_user_pools" "user_selected" {
