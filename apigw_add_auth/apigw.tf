@@ -15,7 +15,8 @@ resource "aws_apigatewayv2_stage" "apigw" {
   auto_deploy = true
 
   access_log_settings {
-
+    destination_arn = aws_cloudwatch_log_group.apigw.arn
+    format = replace(file("${path.module}/logformat.json"), "\n", "")
     }
 }
 
