@@ -15,8 +15,7 @@ resource "aws_apigatewayv2_stage" "apigw" {
   auto_deploy = true
 
   access_log_settings {
-    destination_arn = ""
-    format = ""
+
     }
 }
 
