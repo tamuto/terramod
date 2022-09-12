@@ -53,11 +53,11 @@ resource "aws_cognito_user_pool" "user_pool" {
       schema
     ]
   }
-  email_configuration {
-    source_arn = data.aws_ses_email_identity.example.arn
-    from_email_address = var.from_email_address
-    email_sending_account = "DEVELOPER"
-  }
+  # email_configuration {
+  #   source_arn = data.aws_ses_email_identity.example.arn
+  #   from_email_address = var.from_email_address
+  #   email_sending_account = "DEVELOPER"
+  # }
 }
 
 # App Client
@@ -70,6 +70,6 @@ resource "aws_cognito_user_pool_client" "pool_client" {
   prevent_user_existence_errors = "ENABLED"
 }
 
-data "aws_ses_email_identity" "example" {
-  email = var.identity_email
-}
+# data "aws_ses_email_identity" "example" {
+#   email = var.identity_email
+# }

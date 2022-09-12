@@ -8,5 +8,5 @@ variable "email_message" {}
 variable "account_recovery" {}
 variable "mfa_configuration" {}
 variable "name" {}
-variable "identity_email" {}
-variable "from_email_address" {}
+# variable "identity_email" {}
+# variable "from_email_address" {}
