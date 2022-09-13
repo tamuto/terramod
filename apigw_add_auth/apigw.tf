@@ -103,6 +103,18 @@ resource "aws_apigatewayv2_route" "cors" {
   target = "integrations/${aws_apigatewayv2_integration.cors.id}"
 }
 
+resource "aws_apigatewayv2_route" "cors_user" {
+  api_id = aws_apigatewayv2_api.apigw_userAuth.id
+  route_key = "OPTIONS /user_auth/{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.cors.id}"
+}
+
+resource "aws_apigatewayv2_route" "cors_manager" {
+  api_id = aws_apigatewayv2_api.apigw_managerAuth.id
+  route_key = "OPTIONS /manager_auth/{proxy+}"
+  target = "integrations/${aws_apigatewayv2_integration.cors.id}"
+}
+
 resource "aws_apigatewayv2_vpc_link" "apigw" {
   name               = "${var.name}-link"
   security_group_ids = [data.aws_security_group.apigw.id]
