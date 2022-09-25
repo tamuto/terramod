@@ -20,36 +20,8 @@ resource "aws_subnet" "subnet" {
     }
 }
 
-resource "aws_internet_gateway" "inetgw" {
-    count = var.create_inetgw == true ? 1 : var.create_natgw == true ? 1 : 0
-    vpc_id = aws_vpc.vpc.id
-}
-
-resource "aws_eip" "eip" {
-    count = var.create_natgw == true ? 1 : 0
-    vpc = true
-}
-
-resource "aws_nat_gateway" "natgw" {
-    count = var.create_natgw == true ? 1 : 0
-    allocation_id = aws_eip.eip[0].id
-    subnet_id = aws_subnet.subnet.id
-
-    tags = {
-        Name = "${var.name}-natgw"
-    }
-}
-
 resource "aws_default_route_table" "rtb" {
     default_route_table_id = aws_vpc.vpc.default_route_table_id
-
-    dynamic "route" {
-        for_each = var.create_inetgw == true ? range(1) : range(0)
-        content {
-            cidr_block = "0.0.0.0/0"
-            gateway_id = aws_internet_gateway.inetgw[0].id
-        }
-    }
 
     tags = {
         Name = "${var.name}-rtb"
@@ -59,4 +31,17 @@ resource "aws_default_route_table" "rtb" {
 resource "aws_route_table_association" "rtb" {
     subnet_id = aws_subnet.subnet.id
     route_table_id = aws_default_route_table.rtb.id
+}
+
+resource "aws_vpc_endpoint" "s3" {
+    count = var.create_s3_endpoint == true ? 1 : 0
+
+    vpc_id = aws_vpc.vpc.id
+    service_name = var.s3_service_name
+
+    tags = {
+        Name = "${var.name}-ep-s3"
+    }
+
+    route_table_ids = [aws_default_route_table.rtb.id]
 }
