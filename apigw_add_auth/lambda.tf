@@ -28,7 +28,7 @@ data "archive_file" "src_cors" {
 resource "aws_lambda_function" "cors" {
     function_name = "cors"
     role = aws_iam_role.iam_role_lambda.arn
-    runtime = "nodejs14.x"
+    runtime = "nodejs16.x"
     handler = "cors.handler"
     timeout = 10
     filename = data.archive_file.src_cors.output_path
