@@ -20,8 +20,8 @@
             "Effect": "Allow",
             "Action": "ssm:StartSession",
             "Resource": [
-                "arn:aws:ec2:*:294515681822:instance/*",
-                "arn:aws:ssm:*:294515681822:document/AWS-StartSSHSession"
+                "arn:aws:ec2:*:<your account>:instance/*",
+                "arn:aws:ssm:*:<your account>:document/AWS-StartSSHSession"
             ],
             "Condition": {
                 "BoolIfExists": {
