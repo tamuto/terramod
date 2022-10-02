@@ -1,16 +1,6 @@
-#
-# VPC
-#
-resource "aws_vpc" "vpc" {
-    cidr_block = var.vpc_cidr
-    enable_dns_hostnames = var.enable_dns_hostnames
-    tags = {
-        Name = "${var.name}-vpc"
-    }
-}
 
 resource "aws_subnet" "subnet" {
-    vpc_id = aws_vpc.vpc.id
+    vpc_id = var.aws_vpc.id
     cidr_block = var.subnet_cidr
 
     availability_zone = var.availability_zone
@@ -22,7 +12,7 @@ resource "aws_subnet" "subnet" {
 
 resource "aws_internet_gateway" "inetgw" {
     count = var.create_inetgw == true ? 1 : var.create_natgw == true ? 1 : 0
-    vpc_id = aws_vpc.vpc.id
+    vpc_id = var.aws_vpc.id
 }
 
 resource "aws_eip" "eip" {
@@ -40,8 +30,8 @@ resource "aws_nat_gateway" "natgw" {
     }
 }
 
-resource "aws_default_route_table" "rtb" {
-    default_route_table_id = aws_vpc.vpc.default_route_table_id
+resource "aws_route_table" "rtb" {
+    vpc_id = var.aws_vpc.id
 
     dynamic "route" {
         for_each = var.create_inetgw == true ? range(1) : range(0)
@@ -52,11 +42,11 @@ resource "aws_default_route_table" "rtb" {
     }
 
     tags = {
-        Name = "${var.name}-rtb"
+        Name = "${var.name}-public-rtb"
     }
 }
 
 resource "aws_route_table_association" "rtb" {
     subnet_id = aws_subnet.subnet.id
-    route_table_id = aws_default_route_table.rtb.id
+    route_table_id = aws_route_table.rtb.id
 }

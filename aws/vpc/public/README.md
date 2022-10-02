@@ -13,9 +13,15 @@
 | vpc_cidr             |                 |             |
 | subnet_cidr          |                 |             |
 | availability_zone    | ap-northeast-1a |             |
-| subnet_name          | public-a1       |             |
+| subnet_name          | public-1a       |             |
 | create_inetgw        | false           |             |
 | create_natgw         | false           |             |
+
+### Outputs
+
+| Variable Name | Description |
+| ------------- | ----------- |
+|               |             |
 
 ### Usage
 

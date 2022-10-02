@@ -1,8 +1,5 @@
+variable "aws_vpc" {}
 variable "name" {}
-variable "enable_dns_hostnames" {
-    default = true
-}
-variable "vpc_cidr" {}
 variable "subnet_cidr" {}
 variable "availability_zone" {
     default = "ap-northeast-1a"
@@ -15,4 +12,7 @@ variable "create_s3_endpoint" {
 }
 variable "s3_service_name" {
     default = "com.amazonaws.ap-northeast-1.s3"
+}
+variable "nat_gateway_id" {
+    default = null
 }

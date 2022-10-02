@@ -1,8 +1,5 @@
+variable "aws_vpc" {}
 variable "name" {}
-variable "enable_dns_hostnames" {
-    default = true
-}
-variable "vpc_cidr" {}
 variable "subnet_cidr" {}
 variable "availability_zone" {
     default = "ap-northeast-1a"
