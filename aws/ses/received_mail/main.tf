@@ -1,10 +1,10 @@
-# resource "aws_ses_domain_identity" "domain" {
-#   domain = var.receiver_address
-# }
+resource "aws_ses_domain_identity" "domain" {
+  domain = var.receiver_address
+}
 
-# resource "aws_ses_domain_dkim" "domain" {
-#   domain = aws_ses_domain_identity.domain.domain
-# }
+resource "aws_ses_domain_dkim" "domain" {
+  domain = aws_ses_domain_identity.domain.domain
+}
 
 resource "aws_s3_bucket_policy" "mailbox" {
   bucket = var.s3_bucket_id
