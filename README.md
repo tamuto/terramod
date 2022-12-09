@@ -4,11 +4,13 @@ modules for terraform
 
 ## Table of Contents
 
-* AWS
-  * [VPC](./aws/vpc/vpc/README.md)
-  * [Public Subnet](./aws/vpc/public/README.md)
-  * [Private Subnet](./aws/vpc/private/README.md)
+### AWS
 
+* [VPC](./aws/vpc/README.md)
+* EC2
+* SES
+* Cognito
+* API Gateway
 
 ## Usage
 

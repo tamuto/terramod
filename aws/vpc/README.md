@@ -1,5 +1,43 @@
 # Terraform Modules for AWS VPC
 
+## VPC
+
+### Variables
+
+| Varriable Name       | Default | Description    |
+| -------------------- | ------- | -------------- |
+| name                 |         | `'{name}-vpc'` |
+| enable_dns_hostnames | true    |                |
+| vpc_cidr             |         |                |
+
+### Outputs
+
+| Variable Name | Description |
+| ------------- | ----------- |
+| aws_vpc       | vpc object  |
+
+## Public Subnet
+
+![public_vpc](../_img/public_vpc.png)
+
+### Variables
+
+| Varriable Name    | Default         | Description              |
+| ----------------- | --------------- | ------------------------ |
+| aws_vpc           |                 | Terraform aws_vpc Object |
+| name              |                 |                          |
+| subnet_cidr       |                 |                          |
+| availability_zone | ap-northeast-1a |                          |
+| subnet_name       | public-1a       |                          |
+| create_inetgw     | false           |                          |
+| create_natgw      | false           |                          |
+
+### Outputs
+
+| Variable Name  | Description                                           |
+| -------------- | ----------------------------------------------------- |
+| nat_gateway_id | NAT Gateway ID if create_natgw is true, or else null. |
+
 ## Private Subnet
 
 ![private_vpc](../_img/private_vpc.png)
