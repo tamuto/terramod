@@ -2,6 +2,8 @@
 
 ## VPC
 
+![vpc](./_img/vpc.png)
+
 ### Variables
 
 | Varriable Name       | Default | Description    |
@@ -18,7 +20,7 @@
 
 ## Public Subnet
 
-![public_vpc](../_img/public_vpc.png)
+![public_vpc](./_img/public_vpc.png)
 
 ### Variables
 
@@ -40,7 +42,7 @@
 
 ## Private Subnet
 
-![private_vpc](../_img/private_vpc.png)
+![private_vpc](./_img/private_vpc.png)
 
 ### Variables
 
