@@ -14,6 +14,6 @@ variable "bucket_policy" {
 }
 
 data "aws_acm_certificate" "issued" {
-    domain = var.acm
+    domain = var.acm_domain
     statuses = ["ISSUED"]
 }
