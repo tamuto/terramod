@@ -48,7 +48,7 @@ resource "aws_cloudfront_distribution" "web" {
 
         dynamic "function_association" {
             for_each = var.viewer_request_arn == null ? range(0) : range(1)
-            contrent {
+            content {
                 event_type = "viewer-request"
                 function_arn = var.viewer_request_arn
             }
