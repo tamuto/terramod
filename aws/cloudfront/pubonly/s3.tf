@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "s3_policy" {
         }
     }
 
-    statment {
+    statement {
         principals {
             type = "Service"
             identifiers = ["cloudfront.amazonaws.com"]
