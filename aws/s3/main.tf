@@ -17,3 +17,11 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
     ignore_public_acls = true
     restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket_ownership_controls" "firelens" {
+  bucket = aws_s3_bucket.bucket.bucket
+
+  rule {
+    object_ownership = var.object_ownership
+  }
+}

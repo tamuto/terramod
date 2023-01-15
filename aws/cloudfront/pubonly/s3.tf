@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "s3_policy" {
             identifiers = ["cloudfront.amazonaws.com"]
         }
         actions = ["s3:GetObject"]
-        resources = ["${module.s3.bucket.arn}/*"]
+        resources = ["${module.s3.bucket.arn}/public"]
         condition {
             test = "StringEquals"
             variable = "aws:SourceArn"
