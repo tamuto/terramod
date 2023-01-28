@@ -13,3 +13,6 @@ variable "create_inetgw" {
 variable "create_natgw" {
     default = false
 }
+variable "inetgw_id" {
+    default = null
+}

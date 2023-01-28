@@ -41,6 +41,14 @@ resource "aws_route_table" "rtb" {
         }
     }
 
+    dynamic "route" {
+        for_each = var.inetgw_id == null ? range(0) : range(1)
+        content {
+            cidr_block = "0.0.0.0/0"
+            gateway_id = var.inetgw_id
+        }
+    }
+
     tags = {
         Name = "${var.name}-public-rtb"
     }
