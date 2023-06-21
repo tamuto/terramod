@@ -12,3 +12,6 @@ variable "runtime" {
     default = "nodejs18.x"
 }
 variable "role_arn" {}
+variable "publish" {
+    default = false
+}

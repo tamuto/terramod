@@ -12,6 +12,7 @@ resource "aws_lambda_function" "lambda" {
     role = var.role_arn
     handler = var.handler
     runtime = var.runtime
+    publish = var.publish
 
     filename = data.archive_file.empty_function.output_path
     source_code_hash = data.archive_file.empty_function.output_base64sha256
