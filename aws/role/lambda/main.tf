@@ -13,6 +13,11 @@ local {
     region = data.aws_region.current.name
 }
 
+resource "aws_cloudwatch_log_group" "lambda" {
+    name = var.logging_group
+    retention_in_days = var.retention_in_days
+}
+
 data "aws_iam_policy_document" "lambda_policy" {
     statement {
         principals {
