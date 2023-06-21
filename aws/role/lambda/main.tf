@@ -5,6 +5,14 @@ resource "aws_iam_role" "lambda" {
     managed_policy_arns = data.aws_iam_policy_document.logging_policy.json
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+local {
+    account_id = data.aws_caller_identity.current.account_id
+    region = data.aws_region.current.name
+}
+
 data "aws_iam_policy_document" "lambda_policy" {
     statement {
         principals {
@@ -20,14 +28,14 @@ data "aws_iam_policy_document" "lambda_policy" {
 
 data "aws_iam_policy_document" "logging_policy" {
     statement {
-        resources = var.logging_account
+        resources = "arn:aws:logs:${region}:${account_id}"
         effect = "Allow"
         actions = [
             "logs:CreateLogGroup"
         ]
     }
     statement {
-        resources = var.logging_group
+        resources = "arn:aws:logs:${region}:${account_id}:log-group:${var.logging_group}:*"
         effect = "Allow"
         actions = [
             "logs:CreateLogStream",
