@@ -33,14 +33,18 @@ data "aws_iam_policy_document" "lambda_policy" {
 
 data "aws_iam_policy_document" "logging_policy" {
     statement {
-        resources = "arn:aws:logs:${local.region}:${local.account_id}"
+        resources = [
+            "arn:aws:logs:${local.region}:${local.account_id}"
+        ]
         effect = "Allow"
         actions = [
             "logs:CreateLogGroup"
         ]
     }
     statement {
-        resources = "arn:aws:logs:${local.region}:${local.account_id}:log-group:${var.logging_group}:*"
+        resources = [
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:${var.logging_group}:*"
+        ]
         effect = "Allow"
         actions = [
             "logs:CreateLogStream",
