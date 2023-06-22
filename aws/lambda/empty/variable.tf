@@ -15,3 +15,6 @@ variable "role_arn" {}
 variable "publish" {
     default = false
 }
+variable "retention_in_days" {
+    default = 14
+}

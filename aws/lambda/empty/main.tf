@@ -17,3 +17,8 @@ resource "aws_lambda_function" "lambda" {
     filename = data.archive_file.empty_function.output_path
     source_code_hash = data.archive_file.empty_function.output_base64sha256
 }
+
+resource "aws_cloudwatch_log_group" "lambda" {
+    name = "/aws/lambda/${var.function_name}"
+    retention_in_days = var.retention_in_days
+}
