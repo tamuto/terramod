@@ -29,3 +29,24 @@ resource "aws_ecr_lifecycle_policy" "repo" {
         }
     )
 }
+
+data "aws_iam_policy_document" "repo" {
+    statement {
+        sid = "allow-pull-policy"
+        effect = "Allow"
+        principals {
+            type = "AWS"
+            identifiers = var.identifiers
+        }
+        actions = [
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:BatchGetImage",
+            "ecr:BatchCheckLayerAvailability"
+        ]
+    }
+}
+
+resource "aws_ecr_repository_policy" "repo" {
+    repository = aws_ecr_repository.repo.name
+    policy = data.aws_iam_policy_document.repo.json
+}

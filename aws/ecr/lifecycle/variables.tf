@@ -1,4 +1,5 @@
 variable "name" {}
+variable "identifiers" {}
 variable "countNumber" {
     default = 3
 }
