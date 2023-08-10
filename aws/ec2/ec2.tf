@@ -1,5 +1,10 @@
+
+data "aws_ssm_parameter" "ami" {
+    name = var.ami
+}
+
 resource "aws_instance" "ec2" {
-    ami = var.ami
+    ami = data.aws_ssm_parameter.ami.value
     instance_type = var.instance_type
     key_name = var.key_name
     subnet_id = data.aws_subnet.subnet.id

@@ -1,7 +1,7 @@
 variable name {}
 variable private_ip {}
 variable ami {
-    default = "ami-07b4f72c4c356c19d"
+    default = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
 }
 variable instance_type {}
 variable vpc_name {}
