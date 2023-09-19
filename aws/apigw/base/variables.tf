@@ -9,10 +9,10 @@ variable "allow_cors" {
     default = false
 }
 variable "allow_headers" {
-    default = ["*"]
+    default = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"]
 }
 variable "allow_methods" {
-    default = ["*"]
+    default = ["GET", "POST", "PUT", "DELETE"]
 }
 variable "allow_origins" {
     default = ["*"]
