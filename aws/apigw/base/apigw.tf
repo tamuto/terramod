@@ -2,6 +2,15 @@ resource "aws_apigatewayv2_api" "apigw" {
   name = "${var.name}-apigw"
   protocol_type = "HTTP"
   disable_execute_api_endpoint = var.disable_apigw_endpoint
+
+  dynamic "cors_configuration" {
+    for_each = var.allow_cors ? [1] : []
+    content {
+      allow_headers = var.allow_headers
+      allow_methods = var.allow_methods
+      allow_origins = var.allow_origins
+    }
+  }
 }
 
 resource "aws_apigatewayv2_stage" "apigw" {
