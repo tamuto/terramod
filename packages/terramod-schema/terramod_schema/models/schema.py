@@ -128,3 +128,112 @@ class ProviderSchema(BaseModel):
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for YAML serialization."""
         return self.model_dump(exclude_none=True)
+
+    def enrich_with_markdown(self, markdown_dir: "Path", logger: Optional[Any] = None) -> None:
+        """
+        Enrich schema with information from Markdown documentation.
+
+        Args:
+            markdown_dir: Directory containing Markdown files for this provider
+            logger: Optional logger instance
+        """
+        from pathlib import Path
+        import logging as log
+
+        if logger is None:
+            logger = log.getLogger(__name__)
+
+        if not markdown_dir.exists():
+            logger.warning(f"Markdown directory not found: {markdown_dir}")
+            return
+
+        # Import here to avoid circular dependency
+        from ..parsers.markdown_parser import MarkdownParser
+
+        # Helper function to enrich a resource schema
+        def enrich_resource(resource_name: str, resource: ResourceSchema, category: str):
+            # Determine markdown file path
+            possible_paths = [
+                markdown_dir / f"{resource_name}.md",
+                markdown_dir / category / f"{resource_name}.md",
+            ]
+
+            markdown_data = {}
+            for md_path in possible_paths:
+                if md_path.exists():
+                    markdown_data = MarkdownParser.parse_file(md_path)
+                    logger.debug(f"Found markdown for {resource_name} at {md_path}")
+                    break
+
+            if not markdown_data:
+                logger.debug(f"No markdown documentation found for {resource_name}")
+                return
+
+            # Enrich resource description
+            content = md_path.read_text(encoding="utf-8") if md_path.exists() else ""
+            # Extract description from frontmatter or first paragraph
+            import re
+            desc_match = re.search(r'description:\s*[-|]?\s*\n?\s*(.+?)(?:\n---|$)', content, re.DOTALL)
+            if desc_match:
+                desc = desc_match.group(1).strip()
+                if len(desc) > len(resource.description.en_us):
+                    resource.description.en_us = desc
+
+            # Enrich attributes
+            md_arguments = markdown_data.get("arguments", {})
+            md_attributes = markdown_data.get("attributes", {})
+
+            for attr_name, attr in resource.attributes.items():
+                if attr_name in md_arguments:
+                    md_data = md_arguments[attr_name]
+                    # Update description if markdown has more detail
+                    if len(md_data.get("description", "")) > len(attr.description.en_us):
+                        attr.description.en_us = md_data["description"]
+                    # Set default and possible values
+                    if md_data.get("default_value") is not None:
+                        attr.default_value = md_data["default_value"]
+                    if md_data.get("possible_values"):
+                        attr.possible_values = md_data["possible_values"]
+
+                if attr_name in md_attributes:
+                    md_data = md_attributes[attr_name]
+                    if len(md_data.get("description", "")) > len(attr.description.en_us):
+                        attr.description.en_us = md_data["description"]
+
+            # Recursively enrich block types
+            def enrich_blocks(block_dict: Dict[str, BlockSchema]):
+                for block in block_dict.values():
+                    # Enrich block attributes
+                    for attr_name, attr in block.attributes.items():
+                        if attr_name in md_arguments:
+                            md_data = md_arguments[attr_name]
+                            if len(md_data.get("description", "")) > len(attr.description.en_us):
+                                attr.description.en_us = md_data["description"]
+                            if md_data.get("default_value") is not None:
+                                attr.default_value = md_data["default_value"]
+                            if md_data.get("possible_values"):
+                                attr.possible_values = md_data["possible_values"]
+                    # Recursively enrich nested blocks
+                    if block.block_types:
+                        enrich_blocks(block.block_types)
+
+            if resource.block_types:
+                enrich_blocks(resource.block_types)
+
+        # Enrich provider config
+        if self.provider_config:
+            enrich_resource(self.provider_info.name, self.provider_config, "")
+
+        # Enrich resources
+        for res_name, resource in self.resources.items():
+            enrich_resource(res_name, resource, "resources")
+
+        # Enrich data sources
+        for ds_name, data_source in self.data_sources.items():
+            enrich_resource(ds_name, data_source, "data_sources")
+
+        # Enrich ephemeral resources
+        for er_name, eph_resource in self.ephemeral_resources.items():
+            enrich_resource(er_name, eph_resource, "ephemeral_resources")
+
+        logger.info(f"Enriched {self.provider_info.name} with Markdown documentation")

@@ -9,7 +9,7 @@ Terraform関連ツール群
 ```
 terramod/
 ├── packages/
-│   └── tools/          # Terraform Provider schema to YAML converter
+│   └── terramod-schema/  # Terraform Provider schema to YAML converter
 ├── etc/
 │   └── terraform/      # Terraform configuration
 └── output/             # Generated YAML files (gitignored)
@@ -21,7 +21,7 @@ terramod/
 
 Terraform Providerのスキーマとドキュメントを多言語対応のYAML形式に変換するツール
 
-詳細は [packages/tools/README.md](packages/tools/README.md) を参照してください。
+詳細は [packages/terramod-schema/README.md](packages/terramod-schema/README.md) を参照してください。
 
 ## ライセンス
 
