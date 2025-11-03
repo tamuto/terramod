@@ -1,0 +1,32 @@
+[project]
+name = "terramod"
+version = "0.1.0"
+description = "Terraform module generator and schema management tools"
+requires-python = ">=3.12"
+dependencies = [
+    "taskipy>=1.13.0",
+]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+terramod-schema = { workspace = true }
+
+[tool.taskipy.tasks]
+# Terramod Schema tasks
+schema-info = "uv run --directory packages/terramod-schema terramod-schema info"
+schema-download = "uv run --directory packages/terramod-schema terramod-schema download-docs"
+schema-generate = "uv run --directory packages/terramod-schema terramod-schema generate --with-markdown --split"
+schema-generate-single = "uv run --directory packages/terramod-schema terramod-schema generate --with-markdown"
+schema-generate-no-md = "uv run --directory packages/terramod-schema terramod-schema generate --no-diff --split"
+schema-full = "uv run --directory packages/terramod-schema terramod-schema full-process"
+schema-clean = "rm -rf output/*"
+
+# Shortcuts
+info = { cmd = "task schema-info", help = "Show terramod-schema configuration" }
+download = { cmd = "task schema-download", help = "Download provider documentation" }
+generate = { cmd = "task schema-generate", help = "Generate split YAML files (one per resource, with Markdown enrichment)" }
+generate-single = { cmd = "task schema-generate-single", help = "Generate single YAML per provider (legacy mode)" }
+full = { cmd = "task schema-full", help = "Run full process: download + generate" }
+clean = { cmd = "task schema-clean", help = "Clean generated YAML files" }

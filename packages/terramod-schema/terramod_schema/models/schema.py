@@ -42,6 +42,9 @@ class AttributeSchema(BaseModel):
     deprecation_message: Optional[str] = Field(
         default=None, description="Deprecation message"
     )
+    warning: Optional[str] = Field(
+        default=None, description="Warning message (e.g., documentation not found)"
+    )
 
 
 class BlockSchema(BaseModel):
@@ -63,6 +66,9 @@ class BlockSchema(BaseModel):
     )
     min_items: Optional[int] = Field(default=None, description="Minimum items")
     max_items: Optional[int] = Field(default=None, description="Maximum items")
+    warning: Optional[str] = Field(
+        default=None, description="Warning message (e.g., documentation not found)"
+    )
 
 
 # Enable forward references for nested BlockSchema
@@ -182,19 +188,41 @@ class ProviderSchema(BaseModel):
             # Enrich attributes
             md_arguments = markdown_data.get("arguments", {})
             md_attributes = markdown_data.get("attributes", {})
+            md_all_attributes = markdown_data.get("all_attributes", {})
+            md_block_refs = markdown_data.get("block_references", {})
+            md_block_attributes = markdown_data.get("block_attributes", {})
 
-            for attr_name, attr in resource.attributes.items():
+            # Helper function to enrich a single attribute
+            def enrich_attribute(attr_name: str, attr, source: str = "general"):
+                """Enrich a single attribute with markdown data."""
+                # Try argument reference first (most specific)
                 if attr_name in md_arguments:
                     md_data = md_arguments[attr_name]
-                    # Update description if markdown has more detail
-                    if len(md_data.get("description", "")) > len(attr.description.en_us):
-                        attr.description.en_us = md_data["description"]
-                    # Set default and possible values
-                    if md_data.get("default_value") is not None:
-                        attr.default_value = md_data["default_value"]
-                    if md_data.get("possible_values"):
-                        attr.possible_values = md_data["possible_values"]
+                # Fall back to all_attributes (includes nested block attributes)
+                elif attr_name in md_all_attributes:
+                    md_data = md_all_attributes[attr_name]
+                else:
+                    # No markdown data for this attribute
+                    if source == "block":
+                        attr.warning = "No documentation found for this attribute"
+                    return
 
+                # Update description if markdown has more detail
+                if len(md_data.get("description", "")) > len(attr.description.en_us):
+                    attr.description.en_us = md_data["description"]
+
+                # Set default and possible values
+                if md_data.get("default_value") is not None:
+                    attr.default_value = md_data["default_value"]
+                if md_data.get("possible_values"):
+                    attr.possible_values = md_data["possible_values"]
+
+            # Enrich resource attributes
+            for attr_name, attr in resource.attributes.items():
+                enrich_attribute(attr_name, attr, source="resource")
+
+            # Enrich computed attributes (from Attributes Reference section)
+            for attr_name, attr in resource.attributes.items():
                 if attr_name in md_attributes:
                     md_data = md_attributes[attr_name]
                     if len(md_data.get("description", "")) > len(attr.description.en_us):
@@ -202,17 +230,42 @@ class ProviderSchema(BaseModel):
 
             # Recursively enrich block types
             def enrich_blocks(block_dict: Dict[str, BlockSchema]):
-                for block in block_dict.values():
-                    # Enrich block attributes
-                    for attr_name, attr in block.attributes.items():
-                        if attr_name in md_arguments:
-                            md_data = md_arguments[attr_name]
-                            if len(md_data.get("description", "")) > len(attr.description.en_us):
-                                attr.description.en_us = md_data["description"]
-                            if md_data.get("default_value") is not None:
-                                attr.default_value = md_data["default_value"]
-                            if md_data.get("possible_values"):
-                                attr.possible_values = md_data["possible_values"]
+                for block_name, block in block_dict.items():
+                    # Check if this block has documentation via internal link
+                    if block_name in md_block_attributes:
+                        # Use block-specific attributes (most accurate!)
+                        block_attrs = md_block_attributes[block_name]
+                        logger.debug(f"Using block-specific documentation for '{block_name}'")
+
+                        for attr_name, attr in block.attributes.items():
+                            if attr_name in block_attrs:
+                                md_data = block_attrs[attr_name]
+                                # Update description
+                                if len(md_data.get("description", "")) > len(attr.description.en_us):
+                                    attr.description.en_us = md_data["description"]
+                                # Set default and possible values
+                                if md_data.get("default_value") is not None:
+                                    attr.default_value = md_data["default_value"]
+                                if md_data.get("possible_values"):
+                                    attr.possible_values = md_data["possible_values"]
+                            else:
+                                # Attribute not documented in this block's section
+                                attr.warning = f"No documentation found in '{block_name}' section"
+
+                    elif block_name in md_block_refs:
+                        # Block has a reference but we couldn't extract attributes
+                        block.warning = f"Documentation link found ({md_block_refs[block_name]}) but could not extract attributes"
+                        # Try fallback
+                        for attr_name, attr in block.attributes.items():
+                            enrich_attribute(attr_name, attr, source="block")
+
+                    else:
+                        # No internal link found for this block
+                        block.warning = "No documentation link found in Argument Reference"
+                        # Try fallback
+                        for attr_name, attr in block.attributes.items():
+                            enrich_attribute(attr_name, attr, source="block")
+
                     # Recursively enrich nested blocks
                     if block.block_types:
                         enrich_blocks(block.block_types)

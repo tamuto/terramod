@@ -236,6 +236,175 @@ class YAMLGenerator:
         logger.info(f"Generated YAML for {provider_name} at {output_file}")
         return output_file
 
+    def generate_yaml_split(
+        self,
+        provider_schema: ProviderSchema,
+        output_dir: Path,
+        differential: bool = True,
+    ) -> list[Path]:
+        """
+        Generate split YAML files (one per resource/data_source).
+
+        Directory structure:
+        output/
+          {provider}/
+            provider.yaml
+            resources/
+              {resource_name}.yaml
+            data_sources/
+              {data_source_name}.yaml
+            ephemeral_resources/
+              {ephemeral_resource_name}.yaml
+
+        Args:
+            provider_schema: Provider schema to convert
+            output_dir: Output directory for YAML files
+            differential: If True, merge with existing YAML to preserve translations
+
+        Returns:
+            List of generated file paths
+        """
+        provider_name = provider_schema.provider_info.name
+        provider_dir = output_dir / provider_name
+        generated_files = []
+
+        # Create provider directory
+        provider_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate provider config file
+        if provider_schema.provider_config:
+            provider_file = provider_dir / "provider.yaml"
+            provider_data = {
+                "provider_info": provider_schema.provider_info.model_dump(exclude_none=True),
+                "provider_config": provider_schema.provider_config.model_dump(exclude_none=True),
+            }
+
+            # Differential merge for provider config
+            if differential:
+                existing_data = self.load_existing_yaml(provider_file)
+                if existing_data and "provider_config" in existing_data:
+                    provider_data["provider_config"] = self._merge_schema_dict(
+                        existing_data["provider_config"], provider_data["provider_config"]
+                    )
+
+            with open(provider_file, "w", encoding="utf-8") as f:
+                yaml.dump(
+                    provider_data,
+                    f,
+                    Dumper=self.yaml_dumper,
+                    default_flow_style=False,
+                    allow_unicode=True,
+                    sort_keys=False,
+                    width=120,
+                )
+            generated_files.append(provider_file)
+            logger.info(f"Generated provider config: {provider_file}")
+
+        # Generate resource files
+        if provider_schema.resources:
+            resources_dir = provider_dir / "resources"
+            resources_dir.mkdir(exist_ok=True)
+
+            for res_name, resource in provider_schema.resources.items():
+                res_file = resources_dir / f"{res_name}.yaml"
+                res_data = {
+                    "provider_info": provider_schema.provider_info.model_dump(exclude_none=True),
+                    "resource": resource.model_dump(exclude_none=True),
+                }
+
+                # Differential merge
+                if differential:
+                    existing_data = self.load_existing_yaml(res_file)
+                    if existing_data and "resource" in existing_data:
+                        res_data["resource"] = self._merge_schema_dict(
+                            existing_data["resource"], res_data["resource"]
+                        )
+
+                with open(res_file, "w", encoding="utf-8") as f:
+                    yaml.dump(
+                        res_data,
+                        f,
+                        Dumper=self.yaml_dumper,
+                        default_flow_style=False,
+                        allow_unicode=True,
+                        sort_keys=False,
+                        width=120,
+                    )
+                generated_files.append(res_file)
+
+            logger.info(f"Generated {len(provider_schema.resources)} resource files")
+
+        # Generate data source files
+        if provider_schema.data_sources:
+            data_sources_dir = provider_dir / "data_sources"
+            data_sources_dir.mkdir(exist_ok=True)
+
+            for ds_name, data_source in provider_schema.data_sources.items():
+                ds_file = data_sources_dir / f"{ds_name}.yaml"
+                ds_data = {
+                    "provider_info": provider_schema.provider_info.model_dump(exclude_none=True),
+                    "data_source": data_source.model_dump(exclude_none=True),
+                }
+
+                # Differential merge
+                if differential:
+                    existing_data = self.load_existing_yaml(ds_file)
+                    if existing_data and "data_source" in existing_data:
+                        ds_data["data_source"] = self._merge_schema_dict(
+                            existing_data["data_source"], ds_data["data_source"]
+                        )
+
+                with open(ds_file, "w", encoding="utf-8") as f:
+                    yaml.dump(
+                        ds_data,
+                        f,
+                        Dumper=self.yaml_dumper,
+                        default_flow_style=False,
+                        allow_unicode=True,
+                        sort_keys=False,
+                        width=120,
+                    )
+                generated_files.append(ds_file)
+
+            logger.info(f"Generated {len(provider_schema.data_sources)} data source files")
+
+        # Generate ephemeral resource files
+        if provider_schema.ephemeral_resources:
+            ephemeral_dir = provider_dir / "ephemeral_resources"
+            ephemeral_dir.mkdir(exist_ok=True)
+
+            for er_name, ephemeral in provider_schema.ephemeral_resources.items():
+                er_file = ephemeral_dir / f"{er_name}.yaml"
+                er_data = {
+                    "provider_info": provider_schema.provider_info.model_dump(exclude_none=True),
+                    "ephemeral_resource": ephemeral.model_dump(exclude_none=True),
+                }
+
+                # Differential merge
+                if differential:
+                    existing_data = self.load_existing_yaml(er_file)
+                    if existing_data and "ephemeral_resource" in existing_data:
+                        er_data["ephemeral_resource"] = self._merge_schema_dict(
+                            existing_data["ephemeral_resource"], er_data["ephemeral_resource"]
+                        )
+
+                with open(er_file, "w", encoding="utf-8") as f:
+                    yaml.dump(
+                        er_data,
+                        f,
+                        Dumper=self.yaml_dumper,
+                        default_flow_style=False,
+                        allow_unicode=True,
+                        sort_keys=False,
+                        width=120,
+                    )
+                generated_files.append(er_file)
+
+            logger.info(f"Generated {len(provider_schema.ephemeral_resources)} ephemeral resource files")
+
+        logger.info(f"Generated {len(generated_files)} total files for {provider_name}")
+        return generated_files
+
     def generate_all(
         self,
         provider_schemas: list[ProviderSchema],

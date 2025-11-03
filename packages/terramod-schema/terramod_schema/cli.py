@@ -121,8 +121,13 @@ def download_docs(ctx):
     is_flag=True,
     help="Enrich schema with information from Markdown documentation",
 )
+@click.option(
+    "--split",
+    is_flag=True,
+    help="Generate split files (one per resource), default is single file per provider",
+)
 @click.pass_context
-def generate(ctx, no_diff, with_markdown):
+def generate(ctx, no_diff, with_markdown, split):
     """Generate YAML schema files from providers.json."""
     config: Config = ctx.obj["config"]
     logger = logging.getLogger(__name__)
@@ -179,27 +184,44 @@ def generate(ctx, no_diff, with_markdown):
                     f"Markdown directory not found for {provider_name}, skipping enrichment"
                 )
 
-        # Generate YAML file for this provider
+        # Generate YAML file(s) for this provider
         try:
-            output_file = generator.generate_yaml(
-                provider_schema, config.yaml_output_dir, differential=differential
-            )
-            generated_files.append(output_file)
+            if split:
+                # Generate split files (one per resource)
+                files = generator.generate_yaml_split(
+                    provider_schema, config.yaml_output_dir, differential=differential
+                )
+                generated_files.extend(files)
+            else:
+                # Generate single file per provider
+                output_file = generator.generate_yaml(
+                    provider_schema, config.yaml_output_dir, differential=differential
+                )
+                generated_files.append(output_file)
         except Exception as e:
             logger.error(f"Failed to generate YAML for {provider_schema.provider_info.name}: {e}")
             logger.exception(e)
             continue
 
-    logger.info(f"Generated {len(generated_files)} YAML files:")
-    for file_path in generated_files:
-        logger.info(f"  - {file_path}")
+    if split:
+        logger.info(f"Generated {len(generated_files)} split YAML files")
+    else:
+        logger.info(f"Generated {len(generated_files)} provider YAML files:")
+        for file_path in generated_files:
+            logger.info(f"  - {file_path}")
 
     logger.info("YAML generation completed!")
 
 
 @main.command()
+@click.option(
+    "--split",
+    is_flag=True,
+    default=True,
+    help="Generate split files (one per resource), default is True",
+)
 @click.pass_context
-def full_process(ctx):
+def full_process(ctx, split):
     """Run the full process: download docs and generate YAML."""
     logger = logging.getLogger(__name__)
 
@@ -208,8 +230,8 @@ def full_process(ctx):
     # Download docs
     ctx.invoke(download_docs)
 
-    # Generate YAML with Markdown enrichment
-    ctx.invoke(generate, with_markdown=True, no_diff=False)
+    # Generate YAML with Markdown enrichment and split mode
+    ctx.invoke(generate, with_markdown=True, no_diff=False, split=split)
 
     logger.info("Full process completed!")
 
