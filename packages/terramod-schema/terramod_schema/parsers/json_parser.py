@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..models.schema import (
     AttributeSchema,
@@ -212,3 +212,92 @@ class JSONSchemaParser:
             )
 
         return provider_schemas
+
+    @classmethod
+    def get_provider_names(cls, file_path: Path) -> List[str]:
+        """
+        Get list of provider names from providers.json without parsing full schemas.
+
+        Args:
+            file_path: Path to providers.json
+
+        Returns:
+            List of provider full names (e.g., "registry.terraform.io/hashicorp/aws")
+        """
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        return list(data.get("provider_schemas", {}).keys())
+
+    @classmethod
+    def parse_single_provider(cls, file_path: Path, provider_full_name: str) -> Optional[ProviderSchema]:
+        """
+        Parse a single provider from providers.json.
+
+        Args:
+            file_path: Path to providers.json
+            provider_full_name: Full provider name (e.g., "registry.terraform.io/hashicorp/aws")
+
+        Returns:
+            ProviderSchema object or None if provider not found
+        """
+        logger.info(f"Parsing provider: {provider_full_name}")
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        provider_data = data.get("provider_schemas", {}).get(provider_full_name)
+        if not provider_data:
+            logger.warning(f"Provider {provider_full_name} not found in {file_path}")
+            return None
+
+        provider_info = cls.parse_provider_name(provider_full_name)
+
+        # Parse provider configuration
+        provider_config = None
+        if "provider" in provider_data:
+            provider_config = cls.parse_resource(
+                provider_info.name, provider_data["provider"], "provider"
+            )
+
+        # Parse resources
+        resources = {}
+        for res_name, res_data in provider_data.get("resource_schemas", {}).items():
+            resources[res_name] = cls.parse_resource(res_name, res_data, "resource")
+
+        # Parse data sources
+        data_sources = {}
+        for ds_name, ds_data in provider_data.get("data_source_schemas", {}).items():
+            data_sources[ds_name] = cls.parse_resource(
+                ds_name, ds_data, "data_source"
+            )
+
+        # Parse ephemeral resources
+        ephemeral_resources = {}
+        for er_name, er_data in provider_data.get(
+            "ephemeral_resource_schemas", {}
+        ).items():
+            ephemeral_resources[er_name] = cls.parse_resource(
+                er_name, er_data, "ephemeral_resource"
+            )
+
+        # Parse functions
+        functions = provider_data.get("functions", {})
+
+        provider_schema = ProviderSchema(
+            provider_info=provider_info,
+            provider_config=provider_config,
+            resources=resources,
+            data_sources=data_sources,
+            ephemeral_resources=ephemeral_resources,
+            functions=functions,
+        )
+
+        logger.info(
+            f"Parsed {provider_info.name}: "
+            f"{len(resources)} resources, "
+            f"{len(data_sources)} data sources, "
+            f"{len(ephemeral_resources)} ephemeral resources"
+        )
+
+        return provider_schema

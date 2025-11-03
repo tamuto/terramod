@@ -129,52 +129,70 @@ def generate(ctx, no_diff, with_markdown):
 
     logger.info("Starting YAML generation...")
 
-    # Parse providers.json
+    # Get list of provider names without parsing full schemas (memory efficient)
     try:
-        provider_schemas = JSONSchemaParser.parse_file(config.providers_json_path)
+        provider_names = JSONSchemaParser.get_provider_names(config.providers_json_path)
+        logger.info(f"Found {len(provider_names)} providers to process")
     except FileNotFoundError:
         logger.error(f"providers.json not found at {config.providers_json_path}")
         logger.error("Run 'terraform providers schema -json > providers.json' first")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"Failed to parse providers.json: {e}")
+        logger.error(f"Failed to read providers.json: {e}")
         sys.exit(1)
 
-    # Enrich with Markdown if requested
-    if with_markdown:
-        logger.info("Enriching schemas with Markdown documentation...")
-        for provider_schema in provider_schemas:
+    # Process each provider individually (memory efficient)
+    generator = YAMLGenerator()
+    differential = not no_diff
+    generated_files = []
+
+    for provider_full_name in provider_names:
+        logger.info(f"Processing {provider_full_name}...")
+
+        # Parse single provider
+        try:
+            provider_schema = JSONSchemaParser.parse_single_provider(
+                config.providers_json_path, provider_full_name
+            )
+            if not provider_schema:
+                logger.warning(f"Skipping {provider_full_name}")
+                continue
+        except Exception as e:
+            logger.error(f"Failed to parse {provider_full_name}: {e}")
+            logger.exception(e)
+            continue
+
+        # Enrich with Markdown if requested
+        if with_markdown:
             provider_name = provider_schema.provider_info.name
             markdown_dir = config.docs_output_dir / provider_name
 
-            if not markdown_dir.exists():
+            if markdown_dir.exists():
+                logger.info(f"Enriching {provider_name} with Markdown documentation...")
+                try:
+                    provider_schema.enrich_with_markdown(markdown_dir, logger)
+                except Exception as e:
+                    logger.error(f"Failed to enrich {provider_name} with Markdown: {e}")
+                    logger.exception(e)
+            else:
                 logger.warning(
                     f"Markdown directory not found for {provider_name}, skipping enrichment"
                 )
-                continue
 
-            # Enrich resources
-            for res_name, resource in provider_schema.resources.items():
-                # Convert to dict, enrich, and convert back
-                # (This is a simplified approach; in practice, you'd enrich the Pydantic models)
-                logger.debug(f"Enriching {res_name}...")
+        # Generate YAML file for this provider
+        try:
+            output_file = generator.generate_yaml(
+                provider_schema, config.yaml_output_dir, differential=differential
+            )
+            generated_files.append(output_file)
+        except Exception as e:
+            logger.error(f"Failed to generate YAML for {provider_schema.provider_info.name}: {e}")
+            logger.exception(e)
+            continue
 
-            logger.info(f"Enriched {provider_name}")
-
-    # Generate YAML files
-    generator = YAMLGenerator()
-    differential = not no_diff
-
-    try:
-        generated_files = generator.generate_all(
-            provider_schemas, config.yaml_output_dir, differential=differential
-        )
-        logger.info(f"Generated {len(generated_files)} YAML files:")
-        for file_path in generated_files:
-            logger.info(f"  - {file_path}")
-    except Exception as e:
-        logger.error(f"Failed to generate YAML: {e}")
-        sys.exit(1)
+    logger.info(f"Generated {len(generated_files)} YAML files:")
+    for file_path in generated_files:
+        logger.info(f"  - {file_path}")
 
     logger.info("YAML generation completed!")
 
