@@ -12,6 +12,176 @@ class MarkdownParser:
     """Parser for extracting information from Terraform provider Markdown docs."""
 
     @staticmethod
+    def extract_block_references(markdown_content: str) -> Dict[str, str]:
+        """
+        Extract block names and their internal documentation links.
+
+        Args:
+            markdown_content: Markdown content
+
+        Returns:
+            Dictionary mapping block names to section anchor IDs
+            Example: {"ebs_block_device": "#ebs-ephemeral-and-root-block-devices"}
+        """
+        result = {}
+
+        # Find the Argument Reference section
+        arg_ref_pattern = r"##\s*Argument[s]?\s*Reference\s*\n(.*?)(?=\n##|\Z)"
+        arg_ref_match = re.search(
+            arg_ref_pattern, markdown_content, re.DOTALL | re.IGNORECASE
+        )
+
+        if not arg_ref_match:
+            logger.debug("No Argument Reference section found")
+            return result
+
+        arg_ref_section = arg_ref_match.group(1)
+
+        # Pattern: * `block_name` - ... See [text](#section-id) ... or [...](#section-id)
+        # Matches internal links like [Block Devices](#ebs-ephemeral-and-root-block-devices)
+        attr_pattern = r'\*\s*`([^`]+)`\s*-\s*(.*?)(?=\n\*\s*`|\n\n|\Z)'
+
+        for match in re.finditer(attr_pattern, arg_ref_section, re.DOTALL):
+            attr_name = match.group(1).strip()
+            attr_desc = match.group(2).strip()
+
+            # Look for internal links in the description
+            link_pattern = r'\[([^\]]+)\]\(#([^)]+)\)'
+            link_match = re.search(link_pattern, attr_desc)
+
+            if link_match:
+                section_anchor = link_match.group(2)
+                result[attr_name] = f"#{section_anchor}"
+                logger.debug(f"Found link for '{attr_name}': #{section_anchor}")
+
+        logger.debug(f"Extracted {len(result)} block references with internal links")
+        return result
+
+    @staticmethod
+    def extract_section_by_anchor(markdown_content: str, anchor: str) -> str:
+        """
+        Extract section content by its anchor ID.
+
+        Args:
+            markdown_content: Markdown content
+            anchor: Section anchor (e.g., "#ebs-ephemeral-and-root-block-devices")
+
+        Returns:
+            Section content (without the heading)
+        """
+        # Remove leading # if present
+        anchor_id = anchor.lstrip('#')
+
+        # Try to find section by various heading levels (###, ####, etc.)
+        # The anchor is generated from the heading text by:
+        # - Converting to lowercase
+        # - Replacing spaces with hyphens
+        # - Removing special characters
+
+        # Find all headings with level 3 or 4
+        heading_pattern = r'^(#{3,4})\s+(.+?)$'
+
+        lines = markdown_content.split('\n')
+        section_start = None
+        section_level = None
+
+        for i, line in enumerate(lines):
+            match = re.match(heading_pattern, line)
+            if match:
+                heading_level = len(match.group(1))
+                heading_text = match.group(2).strip()
+
+                # Generate anchor from heading text
+                generated_anchor = heading_text.lower()
+                generated_anchor = re.sub(r'[^\w\s-]', '', generated_anchor)
+                generated_anchor = re.sub(r'[-\s]+', '-', generated_anchor)
+
+                if generated_anchor == anchor_id:
+                    section_start = i + 1
+                    section_level = heading_level
+                    break
+
+        if section_start is None:
+            logger.warning(f"Section with anchor '{anchor}' not found")
+            return ""
+
+        # Extract content until next heading of same or higher level
+        section_lines = []
+        for i in range(section_start, len(lines)):
+            line = lines[i]
+
+            # Check if we hit another heading
+            match = re.match(heading_pattern, line)
+            if match:
+                next_level = len(match.group(1))
+                if next_level <= section_level:
+                    break
+
+            section_lines.append(line)
+
+        section_content = '\n'.join(section_lines)
+        logger.debug(f"Extracted section for anchor '{anchor}': {len(section_content)} chars")
+        return section_content
+
+    @staticmethod
+    def extract_block_attributes_from_section(
+        section_content: str, block_name: str
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Extract attributes for a specific block within a section.
+
+        Args:
+            section_content: Content of a documentation section
+            block_name: Name of the block (e.g., "ebs_block_device")
+
+        Returns:
+            Dictionary mapping attribute names to their metadata
+        """
+        result = {}
+
+        # Find the sub-section for this specific block
+        # Patterns like:
+        # - "The `ebs_block_device` block supports the following:"
+        # - "Each `ebs_block_device` block supports the following:"
+        # - "`ebs_block_device` supports:"
+
+        block_pattern = rf"(?:The|Each)\s+`{re.escape(block_name)}`\s+block\s+supports.*?:\s*\n(.*?)(?=\n(?:The|Each)\s+`[^`]+`\s+block\s+supports|\n###|\n##|\Z)"
+
+        match = re.search(block_pattern, section_content, re.DOTALL | re.IGNORECASE)
+
+        if not match:
+            logger.debug(f"No sub-section found for block '{block_name}' in section")
+            return result
+
+        block_section = match.group(1)
+
+        # Extract attributes from this sub-section
+        attr_pattern = r"\*\s*`([^`]+)`\s*[-–—]\s*(.+?)(?=\n\*\s*`|\n\n|\Z)"
+
+        for attr_match in re.finditer(attr_pattern, block_section, re.DOTALL):
+            attr_name = attr_match.group(1).strip()
+            attr_desc = attr_match.group(2).strip()
+
+            # Extract default value and possible values
+            default_value = MarkdownParser._extract_default_value(attr_desc)
+            possible_values = MarkdownParser._extract_possible_values(attr_desc)
+
+            # Check if required/optional
+            is_required = bool(re.search(r"\(required\)", attr_desc, re.IGNORECASE))
+            is_optional = bool(re.search(r"\(optional\)", attr_desc, re.IGNORECASE))
+
+            result[attr_name] = {
+                "description": attr_desc,
+                "default_value": default_value,
+                "possible_values": possible_values,
+                "required": is_required,
+                "optional": is_optional,
+            }
+
+        logger.debug(f"Extracted {len(result)} attributes for block '{block_name}'")
+        return result
+
+    @staticmethod
     def extract_argument_reference(markdown_content: str) -> Dict[str, Dict[str, Any]]:
         """
         Extract argument reference information from Markdown.
@@ -120,11 +290,21 @@ class MarkdownParser:
 
         # Pattern: "Valid values are: X, Y, Z" or "Possible values: X, Y, Z"
         # Also handles: "Valid values are `X`, `Y`, and `Z`"
+        # Additional patterns for common variations:
+        # - "Each value may be one of: X, Y, Z"
+        # - "may be one of: X, Y, Z"
+        # - "can be one of: X, Y, Z"
+        # - "accepts: X, Y, Z"
+        # - "Valid values include X, Y, Z"
         patterns = [
-            r"[Vv]alid\s+values?\s+(?:are|is)[\s:]+(.+?)(?:[.!]|\n|$)",
+            r"[Vv]alid\s+values?\s+(?:are|is|include)[\s:]+(.+?)(?:[.!]|\n|$)",
             r"[Pp]ossible\s+values?[\s:]+(.+?)(?:[.!]|\n|$)",
             r"[Mm]ust\s+be\s+one\s+of[\s:]+(.+?)(?:[.!]|\n|$)",
+            r"[Mm]ay\s+be\s+one\s+of[\s:]+(.+?)(?:[.!]|\n|$)",
+            r"[Cc]an\s+be\s+one\s+of[\s:]+(.+?)(?:[.!]|\n|$)",
             r"[Oo]ne\s+of[\s:]+(.+?)(?:[.!]|\n|$)",
+            r"[Aa]ccepts?[\s:]+(.+?)(?:[.!]|\n|$)",
+            r"[Aa]llowed\s+values?[\s:]+(.+?)(?:[.!]|\n|$)",
         ]
 
         for pattern in patterns:
@@ -145,7 +325,68 @@ class MarkdownParser:
                         ).strip()
                     possible_values.extend([v for v in values if v])
 
-        return possible_values
+                # Only use the first matching pattern to avoid duplicates
+                break
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_values = []
+        for value in possible_values:
+            if value not in seen:
+                seen.add(value)
+                unique_values.append(value)
+
+        return unique_values
+
+    @staticmethod
+    def extract_all_attributes(markdown_content: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Extract all attribute definitions from the entire Markdown document.
+
+        This extracts attributes from all sections, not just "Argument Reference".
+        Useful for finding nested block attributes that are documented in separate sections.
+
+        Args:
+            markdown_content: Markdown content
+
+        Returns:
+            Dictionary mapping attribute names to their metadata
+        """
+        result = {}
+
+        # Pattern: * `attribute_name` - description
+        # This will match attributes in any section of the document
+        attr_pattern = r"\*\s*`([^`]+)`\s*[-–—]\s*(.+?)(?=\n\*\s*`|\n\n|\Z)"
+
+        for match in re.finditer(attr_pattern, markdown_content, re.DOTALL):
+            attr_name = match.group(1).strip()
+            attr_desc = match.group(2).strip()
+
+            # Skip if attribute name contains dots (e.g., "aws_instance.ami")
+            # These are references, not actual attribute definitions
+            if '.' in attr_name:
+                continue
+
+            # Extract default value and possible values
+            default_value = MarkdownParser._extract_default_value(attr_desc)
+            possible_values = MarkdownParser._extract_possible_values(attr_desc)
+
+            # Check if required/optional
+            is_required = bool(re.search(r"\(required\)", attr_desc, re.IGNORECASE))
+            is_optional = bool(re.search(r"\(optional\)", attr_desc, re.IGNORECASE))
+
+            # Store the attribute (if we find it multiple times, keep the most detailed)
+            if attr_name not in result or len(attr_desc) > len(result[attr_name].get("description", "")):
+                result[attr_name] = {
+                    "description": attr_desc,
+                    "default_value": default_value,
+                    "possible_values": possible_values,
+                    "required": is_required,
+                    "optional": is_optional,
+                }
+
+        logger.debug(f"Extracted {len(result)} attributes from entire document")
+        return result
 
     @staticmethod
     def extract_attributes_reference(markdown_content: str) -> Dict[str, Dict[str, Any]]:
@@ -203,9 +444,24 @@ class MarkdownParser:
 
         content = file_path.read_text(encoding="utf-8")
 
+        # Extract block references (internal links)
+        block_refs = cls.extract_block_references(content)
+
+        # Extract block-specific attributes using internal links
+        block_attributes = {}
+        for block_name, anchor in block_refs.items():
+            section_content = cls.extract_section_by_anchor(content, anchor)
+            if section_content:
+                attrs = cls.extract_block_attributes_from_section(section_content, block_name)
+                if attrs:
+                    block_attributes[block_name] = attrs
+
         return {
             "arguments": cls.extract_argument_reference(content),
             "attributes": cls.extract_attributes_reference(content),
+            "all_attributes": cls.extract_all_attributes(content),
+            "block_references": block_refs,
+            "block_attributes": block_attributes,
         }
 
     @classmethod
