@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 [Your Name]
+Copyright (c) 2025 tamuto
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,41 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-## Data Sources Attribution
-
-This tool processes data from the following sources:
-
-### Terraform Provider Documentation
-- Copyright © HashiCorp, Inc.
-- License: MPL 2.0 (Mozilla Public License 2.0)
-- Source: https://registry.terraform.io/
-- Providers: aws, google, azurerm
-
-The documentation content is obtained through the Terraform Registry API and is
-used as input data for conversion to YAML format. The original documentation
-remains under its respective license (MPL 2.0).
-
-### Terraform Provider Schema
-- Generated using: `terraform providers schema -json`
-- Source: Terraform CLI
-- The schema data is extracted and transformed by this tool
-
-## Third-Party Licenses
-
-This project depends on and/or interacts with:
-
-- **Terraform Providers** (hashicorp/aws, hashicorp/google, hashicorp/azurerm)
-  - License: MPL 2.0
-  - Used as runtime dependencies only (binaries)
-  - https://github.com/hashicorp/terraform-provider-aws
-  - https://github.com/hashicorp/terraform-provider-google
-  - https://github.com/hashicorp/terraform-provider-azurerm
-
-## Disclaimer
-
-This is an unofficial tool and is not affiliated with, endorsed by, or
-sponsored by HashiCorp, Inc. Terraform and the Terraform logo are trademarks
-of HashiCorp, Inc.
