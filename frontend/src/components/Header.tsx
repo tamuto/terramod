@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
-import { ClipboardType, Home, Menu, Network, Table, X } from 'lucide-react'
+import { Home, Menu, FileCode2, BookOpen, Search, Sparkles, X } from 'lucide-react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -17,12 +17,8 @@ export default function Header() {
           <Menu size={24} />
         </button>
         <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            <img
-              src="/tanstack-word-logo-white.svg"
-              alt="TanStack Logo"
-              className="h-10"
-            />
+          <Link to="/" className="hover:text-cyan-400 transition-colors">
+            TerraMod Hub
           </Link>
         </h1>
       </header>
@@ -54,13 +50,11 @@ export default function Header() {
             }}
           >
             <Home size={20} />
-            <span className="font-medium">Home</span>
+            <span className="font-medium">ホーム</span>
           </Link>
 
-          {/* Demo Links Start */}
-
           <Link
-            to="/demo/table"
+            to="/templates"
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
             activeProps={{
@@ -68,12 +62,12 @@ export default function Header() {
                 'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
             }}
           >
-            <Table size={20} />
-            <span className="font-medium">TanStack Table</span>
+            <FileCode2 size={20} />
+            <span className="font-medium">テンプレート</span>
           </Link>
 
           <Link
-            to="/demo/tanstack-query"
+            to="/usecases"
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
             activeProps={{
@@ -81,12 +75,12 @@ export default function Header() {
                 'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
             }}
           >
-            <Network size={20} />
-            <span className="font-medium">TanStack Query</span>
+            <BookOpen size={20} />
+            <span className="font-medium">事例集</span>
           </Link>
 
           <Link
-            to="/demo/form/simple"
+            to="/search"
             onClick={() => setIsOpen(false)}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
             activeProps={{
@@ -94,24 +88,21 @@ export default function Header() {
                 'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
             }}
           >
-            <ClipboardType size={20} />
-            <span className="font-medium">Simple Form</span>
+            <Search size={20} />
+            <span className="font-medium">検索</span>
           </Link>
+
+          <div className="my-4 border-t border-gray-700" />
 
           <Link
-            to="/demo/form/address"
+            to="/generate"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2 bg-gradient-to-r from-purple-600 to-pink-600"
           >
-            <ClipboardType size={20} />
-            <span className="font-medium">Address Form</span>
+            <Sparkles size={20} />
+            <span className="font-medium">AI で生成</span>
+            <span className="ml-auto px-2 py-0.5 text-xs font-bold bg-yellow-400 text-yellow-900 rounded">PRO</span>
           </Link>
-
-          {/* Demo Links End */}
         </nav>
       </aside>
     </>

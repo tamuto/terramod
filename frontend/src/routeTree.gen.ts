@@ -9,15 +9,51 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as GenerateRouteImport } from './routes/generate'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsecasesIndexRouteImport } from './routes/usecases/index'
+import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
+import { Route as UsecasesIdRouteImport } from './routes/usecases/$id'
+import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenerateRoute = GenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsecasesIndexRoute = UsecasesIndexRouteImport.update({
+  id: '/usecases/',
+  path: '/usecases/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsecasesIdRoute = UsecasesIdRouteImport.update({
+  id: '/usecases/$id',
+  path: '/usecases/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesIdRoute = TemplatesIdRouteImport.update({
+  id: '/templates/$id',
+  path: '/templates/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
@@ -43,23 +79,41 @@ const DemoFormAddressRoute = DemoFormAddressRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/search': typeof SearchRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/templates/$id': typeof TemplatesIdRoute
+  '/usecases/$id': typeof UsecasesIdRoute
+  '/templates': typeof TemplatesIndexRoute
+  '/usecases': typeof UsecasesIndexRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/search': typeof SearchRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/templates/$id': typeof TemplatesIdRoute
+  '/usecases/$id': typeof UsecasesIdRoute
+  '/templates': typeof TemplatesIndexRoute
+  '/usecases': typeof UsecasesIndexRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/search': typeof SearchRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/templates/$id': typeof TemplatesIdRoute
+  '/usecases/$id': typeof UsecasesIdRoute
+  '/templates/': typeof TemplatesIndexRoute
+  '/usecases/': typeof UsecasesIndexRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
 }
@@ -67,41 +121,107 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/generate'
+    | '/search'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/templates/$id'
+    | '/usecases/$id'
+    | '/templates'
+    | '/usecases'
     | '/demo/form/address'
     | '/demo/form/simple'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/generate'
+    | '/search'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/templates/$id'
+    | '/usecases/$id'
+    | '/templates'
+    | '/usecases'
     | '/demo/form/address'
     | '/demo/form/simple'
   id:
     | '__root__'
     | '/'
+    | '/generate'
+    | '/search'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/templates/$id'
+    | '/usecases/$id'
+    | '/templates/'
+    | '/usecases/'
     | '/demo/form/address'
     | '/demo/form/simple'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GenerateRoute: typeof GenerateRoute
+  SearchRoute: typeof SearchRoute
   DemoTableRoute: typeof DemoTableRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  TemplatesIdRoute: typeof TemplatesIdRoute
+  UsecasesIdRoute: typeof UsecasesIdRoute
+  TemplatesIndexRoute: typeof TemplatesIndexRoute
+  UsecasesIndexRoute: typeof UsecasesIndexRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/generate': {
+      id: '/generate'
+      path: '/generate'
+      fullPath: '/generate'
+      preLoaderRoute: typeof GenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usecases/': {
+      id: '/usecases/'
+      path: '/usecases'
+      fullPath: '/usecases'
+      preLoaderRoute: typeof UsecasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/': {
+      id: '/templates/'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usecases/$id': {
+      id: '/usecases/$id'
+      path: '/usecases/$id'
+      fullPath: '/usecases/$id'
+      preLoaderRoute: typeof UsecasesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/$id': {
+      id: '/templates/$id'
+      path: '/templates/$id'
+      fullPath: '/templates/$id'
+      preLoaderRoute: typeof TemplatesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/tanstack-query': {
@@ -137,8 +257,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GenerateRoute: GenerateRoute,
+  SearchRoute: SearchRoute,
   DemoTableRoute: DemoTableRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  TemplatesIdRoute: TemplatesIdRoute,
+  UsecasesIdRoute: UsecasesIdRoute,
+  TemplatesIndexRoute: TemplatesIndexRoute,
+  UsecasesIndexRoute: UsecasesIndexRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
 }
